@@ -29,6 +29,15 @@ declare global {
 
 		towersRepair?: boolean;
 		towersRepairWalls?: boolean;
+
+		spawnQueue: Array<CreepQueue>;
+	}
+
+	interface CreepQueue {
+		template: TemplateCreep;
+		sourceId?: Id<Source>;
+		target?: string;
+		emergency?: boolean;
 	}
 
 

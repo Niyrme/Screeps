@@ -44,6 +44,9 @@ export class ManagerMemory extends Manager {
 			if (!roomMemory.towersRepairWalls) {
 				roomMemory.towersRepairWalls = false;
 			}
+			if (!roomMemory.spawnQueue) {
+				roomMemory.spawnQueue = new Array<CreepQueue>();
+			}
 		}
 	}
 
