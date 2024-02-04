@@ -1,0 +1,23 @@
+{
+	"name": "screeps-typescript",
+	"version": "1.0.0",
+	"description": "typescript template for screeps",
+	"scripts": {
+		"build": "rollup --bundleConfigAsCjs -c",
+		"watch": "rollup --bundleConfigAsCjs -cw",
+		"push-main": "rollup --bundleConfigAsCjs -c --environment DEST:main",
+		"push-local": "rollup --bundleConfigAsCjs -c --environment DEST:localhost"
+	},
+	"author": "niyrme",
+	"repository": "github:niyrme/screeps-typescript",
+	"license": "MIT",
+	"devDependencies": {
+		"@rollup/plugin-node-resolve": "^15.2.3",
+		"@rollup/plugin-swc": "^0.3.0",
+		"@types/lodash": "^3.10.1",
+		"@types/screeps": "^3.3.7",
+		"lodash": "3.10.1",
+		"rollup": "^4.9.6",
+		"rollup-plugin-clear": "^2.0.7"
+	}
+}
