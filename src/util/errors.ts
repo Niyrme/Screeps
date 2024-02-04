@@ -1,3 +1,5 @@
+import Logging from "./logging.ts";
+
 export const ErrorMap: Record<ScreepsReturnCode, string> = {
 	[OK]: "OK",
 	[ERR_NOT_OWNER]: "ERR_NOT_OWNER",
@@ -18,4 +20,17 @@ export const ErrorMap: Record<ScreepsReturnCode, string> = {
 
 export function CodeToString<C extends keyof typeof ErrorMap>(errorCode: C): (typeof ErrorMap)[C] {
 	return ErrorMap[errorCode];
+}
+
+export function NotImplemented(context: string) {
+	Logging.error(`not implemented: ${context}`);
+}
+
+export function UnhandledError<C extends ScreepsErrorCode>(errorCode: C, context?: string): void {
+	const err = CodeToString(errorCode);
+	Logging.warning(`unhandled error ${err}`, context ? `; context: ${context}` : "");
+}
+
+export function Unreachable(context?: string): never {
+	throw new Error("UNREACHABLE" + (context ? ` ${context}` : ""));
 }

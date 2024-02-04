@@ -1,12 +1,12 @@
 declare global {
 	interface Creep {
-		whisper(text: string): ReturnType<Creep["say"]>;
+		formatContext(): string;
 	}
 }
 
 (() => {
-	Creep.prototype.whisper = function (text) {
-		return this.say(text, false);
+	Creep.prototype.formatContext = function () {
+		return `Creep(${this.name}, ${this.memory.role})`;
 	};
 })();
 
