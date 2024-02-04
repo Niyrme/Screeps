@@ -1,0 +1,13 @@
+{
+	"main": {
+		"host": "https://screeps.com",
+		"token": "<TOKEN>",
+		"branch": "main"
+	},
+	"localhost": {
+		"host": "http://localhost",
+		"token": "<TOKEN>",
+		"branch": "main",
+		"port": 21025
+	}
+}
