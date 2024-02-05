@@ -36,6 +36,7 @@ export const roleHarvest = ((): RoleHarvest => {
 			const err = creep.harvest(source);
 			switch (err) {
 				case OK:
+				case ERR_BUSY:
 					break;
 				case ERR_NOT_IN_RANGE:
 					creep.moveTo(source);
@@ -65,6 +66,7 @@ export const roleHarvest = ((): RoleHarvest => {
 			const err = creep.transfer(storage, RESOURCE_ENERGY);
 			switch (err) {
 				case OK:
+				case ERR_BUSY:
 					break;
 				case ERR_NOT_IN_RANGE:
 					creep.moveTo(storage);
@@ -77,6 +79,7 @@ export const roleHarvest = ((): RoleHarvest => {
 			const err = creep.upgradeController(creep.room.controller);
 			switch (err) {
 				case OK:
+				case ERR_BUSY:
 					break;
 				case ERR_NOT_IN_RANGE:
 					creep.moveTo(creep.room.controller);

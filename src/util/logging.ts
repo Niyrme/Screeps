@@ -15,10 +15,10 @@ export const Logging = (() => {
 		console.log(`<span style="color: ${logColors[level] || "white"};">[${level}]</span>`, ...values);
 	}
 
-	const debug = (...values: Array<unknown>) => Memory.debug && log("DEBUG", "white", ...values);
-	const info = (...values: Array<unknown>) => log("INFO", "lightblue", ...values);
-	const warning = (...values: Array<unknown>) => log("WARNING", "orange", ...values);
-	const error = (...values: Array<unknown>) => log("ERROR", "red", ...values);
+	const debug = (...values: Array<unknown>) => Memory.debug && log(LOG_LEVEL_DEBUG, ...values);
+	const info = (...values: Array<unknown>) => log(LOG_LEVEL_INFO, ...values);
+	const warning = (...values: Array<unknown>) => log(LOG_LEVEL_WARNING, ...values);
+	const error = (...values: Array<unknown>) => log(LOG_LEVEL_ERROR, ...values);
 
 	return {
 		log,

@@ -20,8 +20,7 @@ export const roleUpgrade = ((): RoleUpgrade => {
 	const STAGE_UPGRADE = _stageI++;
 
 	const stages: Stages<UpgradeCreep> = [];
-	stages[STAGE_GATHER] = creep => {
-	};
+	stages[STAGE_GATHER] = creep => creep.gatherEnergy();
 	stages[STAGE_UPGRADE] = creep => {
 		let controller: undefined | null | StructureController;
 		if (creep.memory.controller) {
@@ -34,6 +33,7 @@ export const roleUpgrade = ((): RoleUpgrade => {
 			const err = creep.upgradeController(controller);
 			switch (err) {
 				case OK:
+				case ERR_BUSY:
 					break;
 				case ERR_NOT_IN_RANGE:
 					creep.moveTo(controller);
@@ -55,6 +55,8 @@ export const roleUpgrade = ((): RoleUpgrade => {
 			} else if (creep.memory.stage === STAGE_UPGRADE && creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
 				creep.memory.stage = STAGE_GATHER;
 			}
+
+			stages[creep.memory.stage](creep);
 		},
 	};
 })();
