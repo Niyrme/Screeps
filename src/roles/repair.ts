@@ -67,12 +67,13 @@ export const roleRepair = ((): RoleRepair => {
 					creep.moveTo(structure);
 					break;
 				default:
-					UnhandledError(err, `${creep.formatContext()}.repair`);
+					UnhandledError(err, `${creep}.repair`);
 					break;
 			}
 		} else {
-			// TODO -> harvest
-			Logging.warning(`${creep.formatContext()} no structure to repair`);
+			Logging.warning(`${creep} no structure to repair`);
+			creep.memory.tempRole = "harvest";
+			creep.memory.stage = 0;
 		}
 	};
 
@@ -82,7 +83,12 @@ export const roleRepair = ((): RoleRepair => {
 			if (creep.memory.stage === STAGE_GATHER && creep.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
 				creep.memory.stage = STAGE_REPAIR;
 			} else if (creep.memory.stage === STAGE_REPAIR && creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
-				creep.memory.stage = STAGE_GATHER;
+				if (creep.memory.tempRole === "repair") {
+					delete creep.memory.tempRole;
+					creep.memory.stage = 0;
+				} else {
+					creep.memory.stage = STAGE_GATHER;
+				}
 			}
 
 			stages[creep.memory.stage](creep);

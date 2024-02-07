@@ -6,33 +6,36 @@ declare global {
 		_moveTo: Creep["moveTo"];
 
 		gatherEnergy(amount?: number): void;
-
-		formatContext(): string;
 	}
 }
 
 (() => {
+	Creep.prototype.toString = function () {
+		return `Creep(${this.name}, ${this.memory.role})`;
+	};
+
 	if (!Creep.prototype._moveTo) {
 		Creep.prototype._moveTo = Creep.prototype.moveTo;
 
+		// @ts-ignore
 		Creep.prototype.moveTo = function () {
 			if (Memory.visuals) {
 				if (typeof arguments[0] === "number") {
-				const [x, y]: [number, number] = arguments;
-				this.room.visual.line(this.pos.x, this.pos.y, x, y);
-			} else {
-				const [target]: [RoomPosition | _HasRoomPosition] = arguments;
-				let targetPos: RoomPosition;
-				if ("pos" in target) {
-					targetPos = target.pos;
+					const [x, y] = arguments as unknown as [number, number, undefined | MoveToOpts];
+					this.room.visual.line(this.pos.x, this.pos.y, x, y);
 				} else {
-					targetPos = target;
+					const [target] = arguments as unknown as [RoomPosition | _HasRoomPosition, undefined | MoveToOpts];
+					let targetPos: RoomPosition;
+					if ("pos" in target) {
+						targetPos = target.pos;
+					} else {
+						targetPos = target;
+					}
+					this.room.visual.line(this.pos, targetPos);
 				}
-				this.room.visual.line(this.pos, targetPos);
-			}
 			}
 
-			return this._moveTo.apply(this, arguments);
+			return this._moveTo.apply(this, arguments as unknown as Parameters<(typeof this)["_moveTo"]>);
 		};
 	}
 
@@ -66,7 +69,7 @@ declare global {
 					this.moveTo(storage);
 					break;
 				default:
-					UnhandledError(err, `${this.formatContext()}.withdraw`);
+					UnhandledError(err, `${this}.withdraw`);
 					break;
 			}
 			return;
@@ -88,18 +91,18 @@ declare global {
 					this.moveTo(source);
 					break;
 				default:
-					UnhandledError(err, `${this.formatContext()}.harvest in Creep.gatherEnergy`);
+					UnhandledError(err, `${this}.harvest in Creep.gatherEnergy`);
 					break;
 			}
 
 			return;
 		}
 
-		Logging.warning(`${this.formatContext()}.gatherEnergy no energy source found`);
+		Logging.warning(`${this}.gatherEnergy no energy source found`);
 	};
 
-	Creep.prototype.formatContext = function () {
-		return `Creep(${this.name}, ${this.memory.role})`;
+	Creep.prototype.gatherEnergy.prototype.toString = function () {
+		return "gatherEnergy()";
 	};
 })();
 

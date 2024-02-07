@@ -39,11 +39,11 @@ export const roleUpgrade = ((): RoleUpgrade => {
 					creep.moveTo(controller);
 					break;
 				default:
-					UnhandledError(err, `${creep.formatContext()}.upgradeController`);
+					UnhandledError(err, `${creep}.upgradeController`);
 					break;
 			}
 		} else {
-			Logging.error(`${creep.formatContext()} roleUpgrade[STAGE_UPGRADE] no controller`);
+			Logging.error(`${creep} roleUpgrade[STAGE_UPGRADE] no controller`);
 		}
 	};
 

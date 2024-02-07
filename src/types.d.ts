@@ -17,17 +17,9 @@ declare global {
 
 	// creep memory
 	interface CreepMemory {
+		tempRole?: AnyRole["name"];
 		role: AnyRole["name"];
 		stage?: number;
-	}
-
-	interface RoomMemory {
-		minBuild: number;
-		minHarvest: number;
-		minRepair: number;
-		minUpgrade: number;
-		// buildQueue: PriorityArray<Id<ConstructionSite>>;
-		// repairQueue: PriorityArray<Id<AnyStructure>>;
 	}
 }
 

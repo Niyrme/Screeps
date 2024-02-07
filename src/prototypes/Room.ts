@@ -5,16 +5,32 @@ import type { AnyRole } from "../roles/types";
 import roleUpgrade from "../roles/upgrade.ts";
 
 declare global {
+	interface RoomMemory {
+		minBuild: number;
+		minHarvest: number;
+		minRepair: number;
+		minUpgrade: number;
+		// buildQueue: PriorityArray<Id<ConstructionSite>>;
+		// repairQueue: PriorityArray<Id<AnyStructure>>;
+		weakestEnemy: null | Id<Creep>;
+	}
+
 	interface Room {
 		spawnCreeps(): void;
 
 		queueConstructionSites(): void;
 
 		queueRepairs(): void;
+
+		defend(): void;
 	}
 }
 
 (() => {
+	Room.prototype.toString = function () {
+		return `Room(${this.name}, ${this.controller?.level ?? 0})`;
+	};
+
 	Room.prototype.spawnCreeps = function () {
 		const creeps = this.find(FIND_MY_CREEPS);
 
@@ -77,7 +93,7 @@ declare global {
 			}
 
 			if (role) {
-				const size = Math.floor(Math.min(1, this.controller?.level ?? Infinity, this.energyCapacityAvailable / bodyCost));
+				const size = Math.max(1, Math.min(this.controller?.level ?? Infinity, Math.floor(this.energyCapacityAvailable / bodyCost)));
 
 				const body: Array<BodyPartConstant> = [];
 				for (let i = 0; i < size; i++) {
@@ -98,6 +114,51 @@ declare global {
 	};
 
 	Room.prototype.queueRepairs = function () {
+	};
+
+	Room.prototype.defend = function () {
+		const targets = this.find(FIND_HOSTILE_CREEPS);
+		if (targets.length === 0) {
+			this.memory.weakestEnemy = null;
+			return;
+		}
+
+		const towers: Array<StructureTower> = this.find(FIND_MY_STRUCTURES, {
+			filter: s => s.structureType === STRUCTURE_TOWER,
+		});
+
+		if (this.memory.weakestEnemy) {
+			const target = Game.getObjectById(this.memory.weakestEnemy);
+			if (target) {
+				for (const tower of towers) {
+					tower.attack(target);
+				}
+
+				return;
+			} else {
+				this.memory.weakestEnemy = null;
+			}
+		}
+
+		function filterWeakest(creeps: Array<Creep>): null | Creep {
+			if (creeps.length === 0) {
+				return null;
+			} else if (creeps.length === 1) {
+				return creeps[0];
+			} else {
+				return creeps.reduce((weakest, current) => current.hits < weakest.hits ? current : weakest);
+			}
+		}
+
+		const target =
+			filterWeakest(_.filter(targets, c => _.includes(c.body.map(p => p.type), HEAL)))
+			|| filterWeakest(_.filter(targets, c => _.includes(c.body.map(p => p.type), RANGED_ATTACK)))
+			|| filterWeakest(_.filter(targets, c => _.includes(c.body.map(p => p.type), ATTACK)));
+
+		if (target) {
+			this.memory.weakestEnemy = target.id;
+			this.defend();
+		}
 	};
 })();
 

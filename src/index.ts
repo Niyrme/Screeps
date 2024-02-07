@@ -26,20 +26,26 @@ export function loop(): void {
 			minBuild: 4,
 			minRepair: 2,
 			minUpgrade: 1,
+			weakestEnemy: null,
 		} as RoomMemory);
 
 		room.spawnCreeps();
 		room.queueConstructionSites();
 		room.queueRepairs();
+		room.defend();
 	}
 
 	for (const name in Game.creeps) {
 		const creep = Game.creeps[name];
 
 		try {
-			Roles[creep.memory.role](creep as unknown as any);
+			Roles[creep.memory.tempRole || creep.memory.role](creep as unknown as any);
 		} catch (err) {
-			Logging.error(creep.formatContext(), err.toString());
+			if (err instanceof Error) {
+				Logging.error(`${creep}`, err.toString());
+			} else {
+				throw err;
+			}
 		}
 	}
 }

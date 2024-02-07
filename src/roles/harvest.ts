@@ -42,37 +42,34 @@ export const roleHarvest = ((): RoleHarvest => {
 					creep.moveTo(source);
 					break;
 				default:
-					UnhandledError(err, `${creep.formatContext()}.harvest`);
+					UnhandledError(err, `${creep}.harvest`);
 					break;
 			}
 		} else {
-			Logging.warning(`${creep.formatContext()} could not find source to harvest`);
+			Logging.warning(`${creep} could not find source to harvest`);
 		}
 	};
 	stages[STAGE_DEPOSIT] = creep => {
-		let storage = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
-			filter: s => (
-					s.structureType === STRUCTURE_SPAWN
-					|| s.structureType === STRUCTURE_EXTENSION
-				)
-				&& s.store.getFreeCapacity(RESOURCE_ENERGY) !== 0,
-		});
+		const structures = creep.room.find(FIND_MY_STRUCTURES);
 
-		if (!storage) {
-			storage = creep.room.storage || null;
-		}
+		const find = <T extends StructureConstant>(structureType: T) => _.find(structures, structure => structure.structureType === structureType && (structure as ConcreteStructure<T> & { store: Store<RESOURCE_ENERGY, false> }).store.getFreeCapacity(RESOURCE_ENERGY)) as undefined | ConcreteStructure<T>;
 
-		if (storage) {
-			const err = creep.transfer(storage, RESOURCE_ENERGY);
+		const target = find(STRUCTURE_TOWER)
+			|| find(STRUCTURE_SPAWN)
+			|| find(STRUCTURE_EXTENSION)
+			|| find(STRUCTURE_STORAGE);
+
+		if (target) {
+			const err = creep.transfer(target, RESOURCE_ENERGY);
 			switch (err) {
 				case OK:
 				case ERR_BUSY:
 					break;
 				case ERR_NOT_IN_RANGE:
-					creep.moveTo(storage);
+					creep.moveTo(target);
 					break;
 				default:
-					UnhandledError(err, `${creep.formatContext()}.transfer`);
+					UnhandledError(err, `${creep}.transfer`);
 					break;
 			}
 		} else if (creep.room.controller?.my) {
@@ -85,7 +82,7 @@ export const roleHarvest = ((): RoleHarvest => {
 					creep.moveTo(creep.room.controller);
 					break;
 				default:
-					UnhandledError(err, `${creep.formatContext()}.upgradeController`);
+					UnhandledError(err, `${creep}.upgradeController`);
 					break;
 			}
 		}
@@ -97,7 +94,12 @@ export const roleHarvest = ((): RoleHarvest => {
 			if (creep.memory.stage === STAGE_HARVEST && creep.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
 				creep.memory.stage = STAGE_DEPOSIT;
 			} else if (creep.memory.stage === STAGE_DEPOSIT && creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
-				creep.memory.stage = STAGE_HARVEST;
+				if (creep.memory.tempRole === "build") {
+					delete creep.memory.tempRole;
+					creep.memory.stage = 0;
+				} else {
+					creep.memory.stage = STAGE_HARVEST;
+				}
 			}
 
 			stages[creep.memory.stage](creep);

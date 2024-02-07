@@ -10,6 +10,10 @@ declare global {
 }
 
 (() => {
+	StructureSpawn.prototype.toString = function () {
+		return `Spawn(${this.room.name}, ${this.name})`;
+	};
+
 	if (!StructureSpawn.prototype._spawnCreep) {
 		StructureSpawn.prototype._spawnCreep = StructureSpawn.prototype.spawnCreep;
 
