@@ -68,7 +68,7 @@ Creep.prototype.collectEnergy = function (fromStorage = true) {
 	}
 
 	const droppedEnergy = this.room.find(FIND_DROPPED_RESOURCES, {
-		filter: { resourceType: RESOURCE_ENERGY },
+		filter: r => r.resourceType === RESOURCE_ENERGY,
 	}) as Array<Resource<RESOURCE_ENERGY>>;
 	if (droppedEnergy.length !== 0) {
 		const dropped = this.pos.findClosestByPath(droppedEnergy);
@@ -116,7 +116,7 @@ Creep.prototype.recycleSelf = function () {
 		ignoreCreeps: true,
 	});
 	if (spawn) {
-		const container = spawn.pos.findInRange(FIND_STRUCTURES, 1, { filter: { structureType: STRUCTURE_CONTAINER } }).pop() as undefined | StructureContainer;
+		const container = spawn.pos.findInRange(FIND_STRUCTURES, 1, { filter: s => s.structureType === STRUCTURE_CONTAINER }).pop() as undefined | StructureContainer;
 
 		const err = spawn.recycleCreep(this);
 		switch (err) {

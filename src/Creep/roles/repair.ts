@@ -76,7 +76,7 @@ export const roleRepair: Roles.Repair = {
 
 			if (!structure) {
 				const walls = creep.room.find(FIND_STRUCTURES, {
-					filter: { structureType: STRUCTURE_WALL },
+					filter: s => s.structureType === STRUCTURE_WALL,
 				}) as Array<StructureWall>;
 
 				for (let i = 0; i < 1; i += 0.0001) {

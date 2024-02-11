@@ -62,8 +62,8 @@ export const roleMine: Roles.Mine = {
 				break;
 			case ERR_NOT_IN_RANGE:
 				const container =
-					source.pos.findInRange(FIND_STRUCTURES, 1, { filter: { structureType: STRUCTURE_CONTAINER } }).pop() as undefined | StructureContainer
-					|| source.pos.findInRange(FIND_MY_CONSTRUCTION_SITES, 1, { filter: { structureType: STRUCTURE_CONTAINER } }).pop() as undefined | ConstructionSite<STRUCTURE_CONTAINER>;
+					source.pos.findInRange(FIND_STRUCTURES, 1, { filter: s => s.structureType === STRUCTURE_CONTAINER }).pop() as undefined | StructureContainer
+					|| source.pos.findInRange(FIND_MY_CONSTRUCTION_SITES, 1, { filter: s => s.structureType === STRUCTURE_CONTAINER }).pop() as undefined | ConstructionSite<STRUCTURE_CONTAINER>;
 				const moveErr = creep.moveTo(container || source, {
 					ignoreCreeps: true,
 					...(Memory.visuals ? {
@@ -76,7 +76,7 @@ export const roleMine: Roles.Mine = {
 				});
 				switch (moveErr) {
 					case OK:
-						break
+						break;
 				}
 				break;
 			default:

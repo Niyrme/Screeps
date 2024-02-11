@@ -21,7 +21,7 @@ StructureSpawn.prototype.newCreep = function (body, opts) {
 
 StructureSpawn.prototype.spawnMaxCreep = function (baseBody, opts) {
 	const bodyCost = getBodyCost(baseBody);
-	const size = Math.max(1, Math.min(this.room.controller?.level ?? Infinity, Math.floor(this.room.energyCapacityAvailable / bodyCost)));
+	const size = Math.max(1, Math.floor(this.room.energyCapacityAvailable / bodyCost));
 	const body: Array<BodyPartConstant> = [];
 	for (let i = 0; i < size; i++) {
 		body.push(...baseBody);

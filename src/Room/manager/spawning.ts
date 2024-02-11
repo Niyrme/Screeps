@@ -63,7 +63,7 @@ export function roomSpawning(room: Room) {
 	}
 
 	const haulers = creeps.filter(creep => creep.memory.role === "haul") as Array<Roles.Haul.creep>;
-	spawnMany(roleHaul.spawn, (Object.keys(room.memory.resources.energy).length * 2) - haulers.length);
+	spawnMany(roleHaul.spawn, (Object.keys(room.memory.resources.energy).length + 1) - haulers.length);
 
 	if (triedSpawn || spawns.length === 0) {
 		return;
@@ -86,7 +86,7 @@ export function roomSpawning(room: Room) {
 		return;
 	}
 
-	const damagedWalls = room.find(FIND_STRUCTURES, { filter: { structureType: STRUCTURE_WALL } }).length !== 0;
+	const damagedWalls = room.find(FIND_STRUCTURES, { filter: s => s.structureType === STRUCTURE_WALL }).length !== 0;
 	spawnMany(roleRepair.spawn, (Number(damagedWalls) * 2) - repairers.length);
 
 	if (triedSpawn || spawns.length === 0) {
