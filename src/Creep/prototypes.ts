@@ -31,10 +31,10 @@ Creep.prototype.collectEnergy = function (fromStorage = true) {
 		return err;
 	};
 
-	const withdrawEnergy = (target: Structure | Tombstone | Ruin): ScreepsReturnCode => {
+	const withdrawEnergy = (target: (Structure & HasStore) | Tombstone | Ruin): ScreepsReturnCode => {
 		this.memory.pickupSource = {
 			type: "structure",
-			structure: target.id as unknown as Id<(typeof target) & HasStore<RESOURCE_ENERGY>>,
+			structure: target.id,
 		};
 		const err = this.withdraw(target, RESOURCE_ENERGY);
 		switch (err) {
@@ -50,6 +50,8 @@ Creep.prototype.collectEnergy = function (fromStorage = true) {
 					},
 				} : undefined);
 				break;
+			case ERR_NOT_ENOUGH_RESOURCES:
+				break;
 			default:
 				throw new UnhandledError(err, `${this}.collectEnergy(${target})`);
 		}
@@ -61,13 +63,13 @@ Creep.prototype.collectEnergy = function (fromStorage = true) {
 		switch (this.memory.pickupSource.type) {
 			case "dropped":
 				const resource = Game.getObjectById(this.memory.pickupSource.resource);
-				if (resource) {
+				if (resource && resource.amount !== 0) {
 					err = pickupEnergy(resource);
 				}
 				break;
 			case "structure":
 				const structure = Game.getObjectById(this.memory.pickupSource.structure);
-				if (structure) {
+				if (structure && structure.store.getUsedCapacity(RESOURCE_ENERGY) !== 0) {
 					err = withdrawEnergy(structure);
 				}
 				break;
@@ -115,18 +117,15 @@ Creep.prototype.collectEnergy = function (fromStorage = true) {
 		);
 	}
 
-	for (const sourceId of Object.keys(this.room.memory.resources.energy)) {
-		const containers = Game.getObjectById(sourceId)!.pos.findInRange(FIND_STRUCTURES, 1, {
-			filter: s => s.structureType === STRUCTURE_CONTAINER && s.store.getUsedCapacity(RESOURCE_ENERGY) !== 0,
-		}) as Array<StructureContainer>;
-
-		if (containers.length !== 0) {
-			return withdrawEnergy(
-				this.pos.findClosestByPath(containers, {
-					ignoreCreeps: true,
-				})!,
-			);
-		}
+	const containers = this.room.find(FIND_STRUCTURES, {
+		filter: s => s.structureType === STRUCTURE_CONTAINER && s.store.getUsedCapacity(RESOURCE_ENERGY) !== 0,
+	}) as Array<StructureContainer>;
+	if (containers.length !== 0) {
+		return withdrawEnergy(
+			this.pos.findClosestByPath(containers, {
+				ignoreCreeps: true,
+			})!,
+		);
 	}
 
 	if (fromStorage && this.room.storage?.store.getUsedCapacity(RESOURCE_ENERGY)) {
@@ -145,12 +144,16 @@ Creep.prototype.recycleSelf = function () {
 	if (spawn) {
 		const container = spawn.pos.findInRange(FIND_STRUCTURES, 1, { filter: s => s.structureType === STRUCTURE_CONTAINER }).pop() as undefined | StructureContainer;
 
+		if (container && !this.pos.isEqualTo(container)) {
+			return this.moveTo(container);
+		}
+
 		const err = spawn.recycleCreep(this);
 		switch (err) {
 			case OK:
 				break;
 			case ERR_NOT_IN_RANGE:
-				this.moveTo(container || spawn);
+				this.moveTo(spawn);
 				break;
 			default:
 				throw new UnhandledError(err);
