@@ -21,7 +21,7 @@ Creep.prototype.collectEnergy = function (fromStorage = true) {
 					visualizePathStyle: {
 						lineStyle: "dotted",
 						stroke: "#ff0",
-						opacity: 0.5,
+						opacity: 0.2,
 					},
 				} : undefined);
 				break;
@@ -45,8 +45,8 @@ Creep.prototype.collectEnergy = function (fromStorage = true) {
 				this.moveTo(target, Memory.visuals ? {
 					visualizePathStyle: {
 						lineStyle: "dashed",
-						stroke: "#f9f",
-						opacity: 0.5,
+						stroke: "#f5a9b8",
+						opacity: 0.2,
 					},
 				} : undefined);
 				break;

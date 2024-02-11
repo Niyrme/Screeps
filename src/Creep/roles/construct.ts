@@ -63,7 +63,13 @@ export const roleConstruct: Roles.Construct = {
 					case ERR_BUSY:
 						break;
 					case ERR_NOT_IN_RANGE:
-						creep.moveTo(site);
+						creep.moveTo(site, Memory.visuals ? {
+							visualizePathStyle: {
+								lineStyle: "solid",
+								stroke: "#5bcefa",
+								opacity: 0.2,
+							},
+						} : undefined);
 						break;
 					default:
 						throw new UnhandledError(err);
