@@ -61,7 +61,9 @@ export const roleMine: Roles.Mine = {
 			case ERR_TIRED:
 				break;
 			case ERR_NOT_IN_RANGE:
-				const container = source.pos.findInRange(FIND_STRUCTURES, 1, { filter: { structureType: STRUCTURE_CONTAINER } }).pop() as undefined | StructureContainer;
+				const container =
+					source.pos.findInRange(FIND_STRUCTURES, 1, { filter: { structureType: STRUCTURE_CONTAINER } }).pop() as undefined | StructureContainer
+					|| source.pos.findInRange(FIND_MY_CONSTRUCTION_SITES, 1, { filter: { structureType: STRUCTURE_CONTAINER } }).pop() as undefined | ConstructionSite<STRUCTURE_CONTAINER>;
 				creep.moveTo(container || source);
 				break;
 			default:
