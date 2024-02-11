@@ -9,8 +9,8 @@ declare global {
 
 	type ScreepsErrorCode = Exclude<ScreepsReturnCode, OK>
 
-	interface HasStore {
-		store: Store<ResourceConstant, false>;
+	interface HasStore<R extends ResourceConstant = ResourceConstant> {
+		store: Store<R, false>;
 	}
 
 	interface CustomMemory {

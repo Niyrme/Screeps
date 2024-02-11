@@ -1,4 +1,4 @@
-import { UnhandledError } from "../util/errors.ts";
+import { UnhandledError, UnreachableError } from "../util/errors.ts";
 import Logging from "../util/logging.ts";
 
 Creep.prototype.toString = function () {
@@ -6,7 +6,36 @@ Creep.prototype.toString = function () {
 };
 
 Creep.prototype.collectEnergy = function (fromStorage = true) {
+	const pickupEnergy = (target: Resource<RESOURCE_ENERGY>): ScreepsReturnCode => {
+		this.memory.pickupSource = {
+			type: "dropped",
+			resource: target.id,
+		};
+		const err = this.pickup(target);
+		switch (err) {
+			case OK:
+			case ERR_BUSY:
+				break;
+			case ERR_NOT_IN_RANGE:
+				this.moveTo(target, Memory.visuals ? {
+					visualizePathStyle: {
+						lineStyle: "dotted",
+						stroke: "#ff0",
+						opacity: 0.5,
+					},
+				} : undefined);
+				break;
+			default:
+				throw new UnhandledError(err);
+		}
+		return err;
+	};
+
 	const withdrawEnergy = (target: Structure | Tombstone | Ruin): ScreepsReturnCode => {
+		this.memory.pickupSource = {
+			type: "structure",
+			structure: target.id as unknown as Id<(typeof target) & HasStore<RESOURCE_ENERGY>>,
+		};
 		const err = this.withdraw(target, RESOURCE_ENERGY);
 		switch (err) {
 			case OK:
@@ -26,6 +55,29 @@ Creep.prototype.collectEnergy = function (fromStorage = true) {
 		}
 		return err;
 	};
+
+	if (this.memory.pickupSource) {
+		switch (this.memory.pickupSource.type) {
+			case "dropped":
+				const resource = Game.getObjectById(this.memory.pickupSource.resource);
+				if (resource) {
+					return pickupEnergy(resource);
+				} else {
+					break;
+				}
+			case "structure":
+				const structure = Game.getObjectById(this.memory.pickupSource.structure);
+				if (structure) {
+					return withdrawEnergy(structure);
+				} else {
+					break;
+				}
+			default:
+				// @ts-ignore
+				throw new UnreachableError(`${this}.memory.pickupSource.type = ${this.memory.pickupSource.type}`);
+		}
+		delete this.memory.pickupSource;
+	}
 
 	const tombstones = this.room.find(FIND_TOMBSTONES, {
 		filter: t => t.store.getUsedCapacity(RESOURCE_ENERGY) !== 0,
@@ -67,22 +119,14 @@ Creep.prototype.collectEnergy = function (fromStorage = true) {
 		return withdrawEnergy(this.room.storage);
 	}
 
-	const dropped = this.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
+	const droppedEnergy = this.room.find(FIND_DROPPED_RESOURCES, {
 		filter: { resourceType: RESOURCE_ENERGY },
-	});
-	if (dropped) {
-		const err = this.pickup(dropped);
-		switch (err) {
-			case OK:
-			case ERR_BUSY:
-				break;
-			case ERR_NOT_IN_RANGE:
-				this.moveTo(dropped);
-				break;
-			default:
-				throw new UnhandledError(err);
+	}) as Array<Resource<RESOURCE_ENERGY>>;
+	if (droppedEnergy.length !== 0) {
+		const dropped = this.pos.findClosestByPath(droppedEnergy);
+		if (dropped) {
+			return pickupEnergy(dropped);
 		}
-		return err;
 	}
 
 	Logging.warning(`${this}.collectEnergy(${fromStorage}) no energy found`);
