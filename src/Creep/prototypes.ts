@@ -56,6 +56,33 @@ Creep.prototype.collectEnergy = function (fromStorage = true) {
 		return err;
 	};
 
+	if (this.memory.pickupSource) {
+		let err: ScreepsReturnCode = ERR_NOT_FOUND;
+		switch (this.memory.pickupSource.type) {
+			case "dropped":
+				const resource = Game.getObjectById(this.memory.pickupSource.resource);
+				if (resource) {
+					err = pickupEnergy(resource);
+				}
+				break;
+			case "structure":
+				const structure = Game.getObjectById(this.memory.pickupSource.structure);
+				if (structure) {
+					err = withdrawEnergy(structure);
+				}
+				break;
+			default:
+				// @ts-ignore
+				throw new UnreachableError(`${this}.memory.pickupSource.type = ${this.memory.pickupSource.type}`);
+		}
+		switch (err) {
+			case OK:
+			case ERR_NOT_FOUND:
+				delete this.memory.pickupSource;
+		}
+		return err;
+	}
+
 	const tombstones = this.room.find(FIND_TOMBSTONES, {
 		filter: t => t.store.getUsedCapacity(RESOURCE_ENERGY) !== 0,
 	});
