@@ -55,7 +55,15 @@ export const roleRepair: Roles.Repair = {
 						filter: s => s.hits < s.hitsMax,
 					}),
 					...creep.room.find(FIND_STRUCTURES, {
-						filter: s => s.structureType === STRUCTURE_CONTAINER && s.hits < s.hitsMax,
+						filter(s) {
+							switch (s.structureType) {
+								case STRUCTURE_CONTAINER:
+								case STRUCTURE_ROAD:
+									return s.hits < s.hitsMax;
+								default:
+									return false;
+							}
+						},
 					}) as Array<StructureContainer>,
 				];
 

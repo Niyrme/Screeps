@@ -78,7 +78,7 @@ export function roomSpawning(room: Room) {
 
 	const repairers = creeps.filter(creep => creep.memory.role === "repair") as Array<Roles.Repair.creep>;
 	const damagedStructures: Array<AnyOwnedStructure | StructureContainer | StructureWall> = room.find(FIND_STRUCTURES, {
-		filter: s => (("my" in s && s.my) || _.includes([STRUCTURE_CONTAINER], s.structureType)) && s.hits < s.hitsMax,
+		filter: s => (("my" in s && s.my) || _.includes([STRUCTURE_CONTAINER, STRUCTURE_ROAD], s.structureType)) && s.hits < s.hitsMax,
 	});
 	spawnMany(roleRepair.spawn, Math.ceil(Math.sqrt(damagedStructures.length)) - repairers.length);
 
