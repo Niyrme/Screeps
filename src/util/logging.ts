@@ -3,14 +3,14 @@ export const LOG_LEVEL_INFO = "INFO";
 export const LOG_LEVEL_WARNING = "WARNING";
 export const LOG_LEVEL_ERROR = "ERROR";
 
-export const Logging = (() => {
-	const logColors: Record<string, string> = {
-		[LOG_LEVEL_DEBUG]: "white",
-		[LOG_LEVEL_INFO]: "lightblue",
-		[LOG_LEVEL_WARNING]: "orange",
-		[LOG_LEVEL_ERROR]: "red",
-	};
+export const logColors: Record<string, string> = {
+	[LOG_LEVEL_DEBUG]: "white",
+	[LOG_LEVEL_INFO]: "lightblue",
+	[LOG_LEVEL_WARNING]: "orange",
+	[LOG_LEVEL_ERROR]: "red",
+};
 
+export const Logging = (() => {
 	function log(level: string, ...values: Array<unknown>) {
 		console.log(`<span style="color: ${logColors[level] || "white"};">[${level}]</span>`, ...values);
 	}

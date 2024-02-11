@@ -1,5 +1,3 @@
-import Logging from "./logging.ts";
-
 export const ErrorMap: Record<ScreepsReturnCode, string> = {
 	[OK]: "OK",
 	[ERR_NOT_OWNER]: "ERR_NOT_OWNER",
@@ -18,19 +16,27 @@ export const ErrorMap: Record<ScreepsReturnCode, string> = {
 	[ERR_GCL_NOT_ENOUGH]: "ERR_GCL_NOT_ENOUGH",
 };
 
-export function CodeToString<C extends keyof typeof ErrorMap>(errorCode: C): (typeof ErrorMap)[C] {
+export function ErrorcodeToString<C extends keyof typeof ErrorMap>(errorCode: C): (typeof ErrorMap)[C] {
 	return ErrorMap[errorCode];
 }
 
-export function NotImplemented(context: string) {
-	Logging.error(`not implemented: ${context}`);
+export class NotImplementedError extends Error {
+	constructor(context: string) {
+		super(`Not implemented: ${context}`);
+	}
 }
 
-export function UnhandledError<C extends ScreepsErrorCode>(errorCode: C, context?: string): void {
-	const err = CodeToString(errorCode);
-	Logging.warning(`unhandled error ${err}`, context ? `; context: ${context}` : "");
+export class UnhandledError<C extends ScreepsErrorCode> extends Error {
+	constructor(
+		public readonly error: C,
+		context: string = "",
+	) {
+		super(`Unhandled ${ErrorcodeToString(error)}` + (context ? `: ${context}` : ""));
+	}
 }
 
-export function Unreachable(context?: string): never {
-	throw new Error("UNREACHABLE" + (context ? ` ${context}` : ""));
+export class UnreachableError extends Error {
+	constructor(message: string) {
+		super(`UNREACHABLE: ${message}`);
+	}
 }
