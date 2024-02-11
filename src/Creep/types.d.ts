@@ -11,5 +11,7 @@ declare global {
 
 	interface Creep {
 		collectEnergy(fromStorage?: boolean): ScreepsReturnCode;
+
+		recycleSelf(): ScreepsReturnCode;
 	}
 }

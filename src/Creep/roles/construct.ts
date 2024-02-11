@@ -75,22 +75,7 @@ export const roleConstruct: Roles.Construct = {
 						throw new UnhandledError(err);
 				}
 			} else {
-				// recycle creep when no more construction sites
-				const spawn = creep.pos.findClosestByPath(Game.rooms[creep.memory.homeRoom].find(FIND_MY_SPAWNS), {
-					ignoreCreeps: true,
-				});
-				if (spawn) {
-					const err = spawn.recycleCreep(creep);
-					switch (err) {
-						case OK:
-							break;
-						case ERR_NOT_IN_RANGE:
-							creep.moveTo(spawn);
-							break;
-						default:
-							throw new UnhandledError(err);
-					}
-				}
+				creep.recycleSelf();
 			}
 		} else {
 			throw new UnreachableError(`${creep}.memory.state = ${creep.memory.state}`);

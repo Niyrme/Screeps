@@ -1,4 +1,4 @@
-import { UnhandledError, UnreachableError } from "../util/errors.ts";
+import { UnhandledError } from "../util/errors.ts";
 import Logging from "../util/logging.ts";
 
 Creep.prototype.toString = function () {
@@ -56,29 +56,6 @@ Creep.prototype.collectEnergy = function (fromStorage = true) {
 		return err;
 	};
 
-	if (this.memory.pickupSource) {
-		switch (this.memory.pickupSource.type) {
-			case "dropped":
-				const resource = Game.getObjectById(this.memory.pickupSource.resource);
-				if (resource) {
-					return pickupEnergy(resource);
-				} else {
-					break;
-				}
-			case "structure":
-				const structure = Game.getObjectById(this.memory.pickupSource.structure);
-				if (structure) {
-					return withdrawEnergy(structure);
-				} else {
-					break;
-				}
-			default:
-				// @ts-ignore
-				throw new UnreachableError(`${this}.memory.pickupSource.type = ${this.memory.pickupSource.type}`);
-		}
-		delete this.memory.pickupSource;
-	}
-
 	const tombstones = this.room.find(FIND_TOMBSTONES, {
 		filter: t => t.store.getUsedCapacity(RESOURCE_ENERGY) !== 0,
 	});
@@ -88,6 +65,16 @@ Creep.prototype.collectEnergy = function (fromStorage = true) {
 				ignoreCreeps: true,
 			})!,
 		);
+	}
+
+	const droppedEnergy = this.room.find(FIND_DROPPED_RESOURCES, {
+		filter: { resourceType: RESOURCE_ENERGY },
+	}) as Array<Resource<RESOURCE_ENERGY>>;
+	if (droppedEnergy.length !== 0) {
+		const dropped = this.pos.findClosestByPath(droppedEnergy);
+		if (dropped && dropped.amount >= this.store.getFreeCapacity(RESOURCE_ENERGY)) {
+			return pickupEnergy(dropped);
+		}
 	}
 
 	const ruins = this.room.find(FIND_RUINS, {
@@ -119,18 +106,32 @@ Creep.prototype.collectEnergy = function (fromStorage = true) {
 		return withdrawEnergy(this.room.storage);
 	}
 
-	const droppedEnergy = this.room.find(FIND_DROPPED_RESOURCES, {
-		filter: { resourceType: RESOURCE_ENERGY },
-	}) as Array<Resource<RESOURCE_ENERGY>>;
-	if (droppedEnergy.length !== 0) {
-		const dropped = this.pos.findClosestByPath(droppedEnergy);
-		if (dropped) {
-			return pickupEnergy(dropped);
-		}
-	}
-
 	Logging.warning(`${this}.collectEnergy(${fromStorage}) no energy found`);
 	return ERR_NOT_FOUND;
+};
+
+Creep.prototype.recycleSelf = function () {
+	const homeRoom = Game.rooms[this.memory.homeRoom];
+	const spawn = this.pos.findClosestByPath(homeRoom.find(FIND_MY_SPAWNS), {
+		ignoreCreeps: true,
+	});
+	if (spawn) {
+		const container = spawn.pos.findInRange(FIND_STRUCTURES, 1, { filter: { structureType: STRUCTURE_CONTAINER } }).pop() as undefined | StructureContainer;
+
+		const err = spawn.recycleCreep(this);
+		switch (err) {
+			case OK:
+				break;
+			case ERR_NOT_IN_RANGE:
+				this.moveTo(container || spawn);
+				break;
+			default:
+				throw new UnhandledError(err);
+		}
+		return err;
+	} else {
+		return ERR_NOT_FOUND;
+	}
 };
 
 export {};

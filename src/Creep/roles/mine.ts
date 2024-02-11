@@ -64,7 +64,20 @@ export const roleMine: Roles.Mine = {
 				const container =
 					source.pos.findInRange(FIND_STRUCTURES, 1, { filter: { structureType: STRUCTURE_CONTAINER } }).pop() as undefined | StructureContainer
 					|| source.pos.findInRange(FIND_MY_CONSTRUCTION_SITES, 1, { filter: { structureType: STRUCTURE_CONTAINER } }).pop() as undefined | ConstructionSite<STRUCTURE_CONTAINER>;
-				creep.moveTo(container || source);
+				const moveErr = creep.moveTo(container || source, {
+					ignoreCreeps: true,
+					...(Memory.visuals ? {
+						visualizePathStyle: {
+							lineStyle: "solid",
+							stroke: "#fff",
+							opacity: 0.2,
+						},
+					} : {}),
+				});
+				switch (moveErr) {
+					case OK:
+						break
+				}
 				break;
 			default:
 				throw new UnhandledError(err);
