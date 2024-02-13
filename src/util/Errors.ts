@@ -16,6 +16,18 @@ export const ErrorMap: Record<ScreepsReturnCode, string> = {
 	[ERR_GCL_NOT_ENOUGH]: "ERR_GCL_NOT_ENOUGH",
 };
 
-export function CodeToString<C extends keyof typeof ErrorMap>(errorCode: C): (typeof ErrorMap)[C] {
+export function ErrorcodeToString<C extends keyof typeof ErrorMap>(errorCode: C): (typeof ErrorMap)[C] {
 	return ErrorMap[errorCode];
+}
+
+export class NotImplementedError extends Error {
+	constructor(context: string) {
+		super(`Not implemented: ${context}`);
+	}
+}
+
+export class UnreachableError extends Error {
+	constructor(context: string) {
+		super(`UNREACHABLE: ${context}`);
+	}
 }

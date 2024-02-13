@@ -1,7 +1,7 @@
-// include all utils
-import "./util/_all.ts";
-// include all prototypes
-import "./prototypes/_all.ts";
+import "lib";
+import "RoomPosition";
+import { manageCreep } from "Creep";
+import { manageRoom } from "Room";
 
 export function loop(): void {
 	for (const name in Memory.creeps) {
@@ -9,4 +9,7 @@ export function loop(): void {
 			delete Memory.creeps[name];
 		}
 	}
+
+	_.forEach(Game.rooms, manageRoom);
+	_.forEach(Game.creeps, manageCreep);
 }

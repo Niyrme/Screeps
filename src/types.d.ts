@@ -1,14 +1,15 @@
 declare global {
-	// global memory
-	interface Memory {
+	interface ObjectConstructor {
+		keys<K extends keyof any>(o: Record<K, unknown>): Array<K>;
+	}
+}
+
+declare global {
+	interface CustomMemory {
+		debug: boolean;
 	}
 
-	// creep memory
-	interface CreepMemory {
-	}
-
-	// creep prototypes
-	interface Creep {
+	interface Memory extends CustomMemory {
 	}
 }
 

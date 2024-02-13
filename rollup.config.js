@@ -2,9 +2,12 @@
 
 import nodeResolve from "@rollup/plugin-node-resolve";
 import swc from "@rollup/plugin-swc";
-import clear from "rollup-plugin-clear";
-import screepsDeploy from "./rollup/rollup-plugin-screeps-deploy.js";
-import screeps from "./rollup/rollup-plugin-screeps.js";
+import _ from "lodash";
+import fs from "node:fs";
+import path from "node:path";
+import copy from "rollup-plugin-copy";
+import screeps from "./rollup/rollup-plugin-screeps";
+import screepsDeploy from "./rollup/rollup-plugin-screeps-deploy";
 
 let cfg;
 const dest = process.env.DEST;
@@ -12,21 +15,67 @@ if (dest && (!(cfg = require("./screeps.json")[dest]))) {
 	throw new Error("A");
 }
 
-/** @type {import("rollup").RollupOptions} */
-const options = {
-	input: "src/index.ts",
+const excludeFromModules = ["lib", "util"];
+const modules = fs.readdirSync("src", { recursive: false })
+	.filter(name => (!_.includes(excludeFromModules, name)) && fs.statSync(path.join("src", name)).isDirectory())
+	.toSorted();
+
+/** @type {Array<Partial<import("rollup").RollupOptions>>} */
+const inputs = [
+	{
+		input: "src/lib/_index.ts",
+		output: {
+			file: "dist/lib.js",
+		},
+	},
+	{
+		input: "src/util/_index.ts",
+		output: {
+			file: "dist/util.js",
+		},
+	},
+	...modules.map(module => ({
+		input: `src/${module}/_index.ts`,
+		output: {
+			file: `dist/${module}.js`,
+		},
+		external: [
+			"util",
+		],
+	})),
+	{
+		input: "src/index.ts",
+		output: {
+			file: "dist/main.js",
+		},
+		external: [
+			"lib",
+			"util",
+			...modules,
+		],
+		plugins: [
+			copy({
+				targets: [
+					{ src: "src/lib/**/*.wasm", dest: "dist" },
+				],
+			}),
+		],
+	},
+];
+
+/** @type {Partial<import("rollup").RollupOptions>} */
+const baseOptions = {
 	output: {
-		file: `dist/main.js`,
 		format: "commonjs",
 		inlineDynamicImports: true,
 		globals: {
 			"_": "lodash",
 		},
 	},
+	external: [
+		"util",
+	],
 	plugins: [
-		clear({
-			targets: ["dist"],
-		}),
 		nodeResolve(),
 		swc({
 			swc: {
@@ -44,5 +93,8 @@ const options = {
 		screepsDeploy({ dest, config: cfg }),
 	],
 };
+
+/** @type {Array<import("rollup").RollupOptions>} */
+const options = inputs.map((inputOptions) => _.merge({}, baseOptions, inputOptions));
 
 export default options;
