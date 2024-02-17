@@ -108,17 +108,17 @@ Creep.prototype.gatherEnergy = function (fromStorage = true) {
 	if (!src) {return ERR_NOT_FOUND;}
 
 	if ((src as Resource<RESOURCE_ENERGY>).amount) {
-		const err = this.pickup(src as Resource<RESOURCE_ENERGY>);
+		let err = this.pickup(src as Resource<RESOURCE_ENERGY>);
 		if (err === ERR_NOT_IN_RANGE) {
 			this.travelTo(src as Resource<RESOURCE_ENERGY>);
-			this.pickup(src as Resource<RESOURCE_ENERGY>);
+			err = this.pickup(src as Resource<RESOURCE_ENERGY>);
 		}
 		return err;
 	} else {
-		const err = this.withdraw(src as Tombstone | Ruin | AnyStoreStructure, RESOURCE_ENERGY);
+		let err = this.withdraw(src as Tombstone | Ruin | AnyStoreStructure, RESOURCE_ENERGY);
 		if (err === ERR_NOT_IN_RANGE) {
 			this.travelTo(src);
-			this.withdraw(src as Tombstone | Ruin | AnyStoreStructure, RESOURCE_ENERGY);
+			err = this.withdraw(src as Tombstone | Ruin | AnyStoreStructure, RESOURCE_ENERGY);
 		}
 		return err;
 	}

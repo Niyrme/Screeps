@@ -1,4 +1,4 @@
-import { registerRole } from "util";
+import { clamp, registerRole } from "util";
 import { getBodyCost } from "../util.ts";
 
 declare global {
@@ -13,7 +13,7 @@ declare global {
 			}
 
 			export interface Role extends Roles.Role<Creep> {
-				spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType;
+				spawn(spawn: StructureSpawn, bootstrap?: boolean): StructureSpawn.SpawnCreepReturnType;
 			}
 		}
 	}
@@ -23,7 +23,7 @@ export const ROLE_HAUL = "haul";
 registerRole(ROLE_HAUL);
 
 export const roleHaul: Roles.Haul.Role = {
-	spawn(spawn) {
+	spawn(spawn, bootstrap = false) {
 		const memory: Roles.Haul.Memory = {
 			home: spawn.room.name,
 			recycleSelf: false,
@@ -31,9 +31,14 @@ export const roleHaul: Roles.Haul.Role = {
 		};
 
 		const baseBody: Array<BodyPartConstant> = [CARRY, MOVE];
-		const size = Math.max(1, Math.floor(
-			spawn.room.energyAvailable / getBodyCost(baseBody),
-		));
+		const size = clamp(
+			Math.floor(
+				(bootstrap ? spawn.room.energyAvailable : spawn.room.energyCapacityAvailable)
+				/ getBodyCost(baseBody),
+			),
+			1,
+			6,
+		);
 
 		const body = _.flatten(_.fill(new Array(size), baseBody));
 
@@ -68,13 +73,11 @@ export const roleHaul: Roles.Haul.Role = {
 				},
 			});
 			if (dest) {
-				const err = creep.transfer(dest, RESOURCE_ENERGY);
-
+				let err = creep.transfer(dest, RESOURCE_ENERGY);
 				if (err === ERR_NOT_IN_RANGE) {
 					creep.travelTo(dest);
-					creep.transfer(dest, RESOURCE_ENERGY);
+					err = creep.transfer(dest, RESOURCE_ENERGY);
 				}
-
 				return err;
 			}
 		}

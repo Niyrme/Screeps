@@ -79,7 +79,7 @@ export const roleBuild: Roles.Build.Role = {
 					creep.travelTo(site, { range: BUILD_CONSTRUCTIONSITE_RANGE });
 					err = creep.build(site);
 				}
-				return creep.build(site);
+				return err;
 			} else {
 				creep.memory.recycleSelf = true;
 			}

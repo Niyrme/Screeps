@@ -57,11 +57,12 @@ export const roleHarvest: Roles.Harvest.Role = {
 		if (creep.memory.gather) {
 			const source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
 			if (source) {
-				if (!creep.pos.inRangeTo(source, 1)) {
+				let err = creep.harvest(source);
+				if (err === ERR_NOT_IN_RANGE) {
 					creep.travelTo(source);
+					err = creep.harvest(source);
 				}
-
-				return creep.harvest(source);
+				return err;
 			}
 		} else {
 			const dest = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
@@ -75,13 +76,14 @@ export const roleHarvest: Roles.Harvest.Role = {
 							return false;
 					}
 				},
-			});
+			}) as null | StructureSpawn | StructureExtension | StructureTower;
 			if (dest) {
-				if (!creep.pos.inRangeTo(dest, 1)) {
+				let err = creep.transfer(dest, RESOURCE_ENERGY);
+				if (err === ERR_NOT_IN_RANGE) {
 					creep.travelTo(dest);
+					err = creep.transfer(dest, RESOURCE_ENERGY);
 				}
-
-				return creep.transfer(dest, RESOURCE_ENERGY);
+				return err;
 			}
 		}
 		return ERR_NOT_FOUND;

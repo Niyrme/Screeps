@@ -62,13 +62,11 @@ export const roleUpgrade: Roles.Upgrade.Role = {
 				return ERR_NOT_FOUND;
 			}
 
-			const err = creep.upgradeController(creep.room.controller);
-
+			let err = creep.upgradeController(creep.room.controller);
 			if (err === ERR_NOT_IN_RANGE) {
 				creep.travelTo(creep.room.controller, { range: UPGRADE_CONTROLLER_RANGE });
-				creep.upgradeController(creep.room.controller);
+				err = creep.upgradeController(creep.room.controller);
 			}
-
 			return err;
 		}
 	},

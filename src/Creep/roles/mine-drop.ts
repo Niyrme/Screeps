@@ -48,13 +48,20 @@ export const roleMineDrop: Roles.MineDrop.Role = {
 	run(creep) {
 		const source = Game.getObjectById(creep.memory.source)!;
 
-		const err = creep.harvest(source);
-
-		if (err === ERR_NOT_IN_RANGE) {
-			creep.travelTo(source);
-			creep.harvest(source);
+		const [container] = source.pos.findInRange(
+			FIND_STRUCTURES,
+			1,
+			{ filter: ({ structureType: t }) => t === STRUCTURE_CONTAINER },
+		) as Array<StructureContainer>;
+		if (container && !container.pos.isEqualTo(creep.pos)) {
+			creep.travelTo(container, { range: 0 });
 		}
 
+		let err = creep.harvest(source);
+		if (err === ERR_NOT_IN_RANGE) {
+			creep.travelTo(source);
+			err = creep.harvest(source);
+		}
 		return err;
 	},
 };
