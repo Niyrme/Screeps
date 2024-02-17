@@ -15,7 +15,11 @@ function findDamagedStructure(room: Room): null | AnyStructure {
 		return null;
 	}
 
-	const reduceDamaged = (weakest: AnyStructure, current: AnyStructure) => (current.hitsMax - current.hits) < (weakest.hitsMax - weakest.hits) ? current : weakest;
+	const reduceDamaged = (weakest: AnyStructure, current: AnyStructure) => {
+		return (current.hitsMax - current.hits) < (weakest.hitsMax - weakest.hits)
+			? current
+			: weakest;
+	};
 
 	const notRampart = structures.filter(s => s.structureType !== STRUCTURE_RAMPART);
 	if (notRampart.length !== 0) {

@@ -3,7 +3,7 @@ import { getBodyCost } from "../util.ts";
 
 declare global {
 	export namespace Roles {
-		export namespace Haul {
+		export namespace Harvest {
 			export interface Memory extends CreepMemory {
 				gather: boolean;
 			}
@@ -13,26 +13,28 @@ declare global {
 			}
 
 			export interface Role extends Roles.Role<Creep> {
-				spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType;
+				spawn(spawn: StructureSpawn, bootstrap?: boolean): StructureSpawn.SpawnCreepReturnType;
 			}
 		}
 	}
 }
 
-export const ROLE_HAUL = "haul";
-registerRole(ROLE_HAUL);
+export const ROLE_HARVEST = "harvest";
+registerRole(ROLE_HARVEST);
 
-export const roleHaul: Roles.Haul.Role = {
-	spawn(spawn) {
-		const memory: Roles.Haul.Memory = {
+export const roleHarvest: Roles.Harvest.Role = {
+	spawn(spawn, bootstrap = false) {
+		const memory: Roles.Harvest.Memory = {
 			home: spawn.room.name,
 			recycleSelf: false,
 			gather: true,
 		};
 
-		const baseBody: Array<BodyPartConstant> = [CARRY, MOVE];
+		const baseBody: Array<BodyPartConstant> = [WORK, CARRY, MOVE];
+		const baseBodyCost = getBodyCost(baseBody);
+
 		const size = Math.max(1, Math.floor(
-			spawn.room.energyAvailable / getBodyCost(baseBody),
+			(bootstrap ? spawn.room.energyAvailable : spawn.room.energyCapacityAvailable) / baseBodyCost,
 		));
 
 		const body = _.flatten(_.fill(new Array(size), baseBody));
@@ -41,7 +43,7 @@ export const roleHaul: Roles.Haul.Role = {
 			body,
 			{ memory },
 			{
-				role: ROLE_HAUL,
+				role: ROLE_HARVEST,
 			},
 		);
 	},
@@ -53,18 +55,13 @@ export const roleHaul: Roles.Haul.Role = {
 		}
 
 		if (this.memory.gather) {
-			const resource = this.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
-				filter: r => r.resourceType === RESOURCE_ENERGY,
-			});
-			if (resource) {
-				const err = this.pickup(resource);
-
-				if (err === ERR_NOT_IN_RANGE) {
-					this.travelTo(resource);
-					this.pickup(resource);
+			const source = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
+			if (source) {
+				if (!this.pos.inRangeTo(source, 1)) {
+					this.travelTo(source);
 				}
 
-				return err;
+				return this.harvest(source);
 			}
 		} else {
 			const dest = this.pos.findClosestByPath(FIND_MY_STRUCTURES, {
@@ -80,17 +77,13 @@ export const roleHaul: Roles.Haul.Role = {
 				},
 			});
 			if (dest) {
-				const err = this.transfer(dest, RESOURCE_ENERGY);
-
-				if (err === ERR_NOT_IN_RANGE) {
+				if (!this.pos.inRangeTo(dest, 1)) {
 					this.travelTo(dest);
-					this.transfer(dest, RESOURCE_ENERGY);
 				}
 
-				return err;
+				return this.transfer(dest, RESOURCE_ENERGY);
 			}
 		}
-
 		return ERR_NOT_FOUND;
 	},
 };

@@ -1,3 +1,4 @@
+// [timestamp]/[1:role]
 export interface CreepName {
 	spawnTime: number;
 	role: string;
@@ -7,12 +8,12 @@ export type EncodeMemory = Omit<CreepName, "spawnTime">
 
 declare global {
 	interface CreepConstructor {
-		find(name: string): null | Creep;
-
 		encodeMemory<M extends EncodeMemory>(memory: M): string;
 	}
 
 	interface CreepMemory {
+		readonly home: string;
+		recycleSelf: boolean;
 	}
 
 	interface Creep {
@@ -20,18 +21,10 @@ declare global {
 	}
 }
 
-Creep.find = function (name) {
-	if (name in Game.creeps) {
-		return Game.creeps[name];
-	} else {
-		return null;
-	}
-};
-
 Creep.encodeMemory = function ({ role }) {
-	const roleId = parseInt(_.findKey(Memory.roleMap, roleName => roleName === role)).toString(36)
+	const roleId = parseInt(_.findKey(Memory.roleMap, roleName => roleName === role)).toString(36);
 
-	return `${roleId}`
+	return `${roleId}`;
 };
 
 Creep.prototype.toString = function () {

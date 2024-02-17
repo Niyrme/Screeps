@@ -2,7 +2,13 @@ import { ErrorcodeToString, Logging } from "util";
 
 declare global {
 	export namespace RoomPosition {
-		export type TryPutConstructionSiteReturnCode = OK | ERR_BUSY | ERR_INVALID_TARGET | ERR_FULL | ERR_INVALID_ARGS | ERR_RCL_NOT_ENOUGH
+		export type TryPutConstructionSiteReturnCode =
+			OK
+			| ERR_BUSY
+			| ERR_INVALID_TARGET
+			| ERR_FULL
+			| ERR_INVALID_ARGS
+			| ERR_RCL_NOT_ENOUGH
 	}
 
 	interface RoomPosition {
@@ -22,7 +28,8 @@ RoomPosition.prototype.tryPutConstructionSite = function (type, spawnName = unde
 			if (!res.structure) {
 				return true;
 			} else {
-				return res.structure.structureType === STRUCTURE_RAMPART || res.structure.structureType === STRUCTURE_ROAD;
+				return res.structure.structureType === STRUCTURE_RAMPART
+					|| res.structure.structureType === STRUCTURE_ROAD;
 			}
 		});
 

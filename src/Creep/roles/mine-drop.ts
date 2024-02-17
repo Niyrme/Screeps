@@ -1,24 +1,60 @@
-import { NotImplementedError, registerRole } from "util";
+import { registerRole } from "util";
+import { getBodyCost } from "../util.ts";
 
 declare global {
 	export namespace Roles {
 		export namespace MineDrop {
 			export interface Memory extends CreepMemory {
+				readonly source: Id<Source>;
 			}
 
 			export interface Creep extends BaseCreep {
 				readonly memory: Memory;
 			}
+
+			export interface Role extends Roles.Role<Creep> {
+				spawn(spawn: StructureSpawn, source: Id<Source>): StructureSpawn.SpawnCreepReturnType;
+			}
 		}
 	}
 }
 
-registerRole("mineDrop");
+export const ROLE_MINE_DROP = "mineDrop";
+registerRole(ROLE_MINE_DROP);
 
-export const roleMineDrop: Roles.Role<Roles.MineDrop.Creep> = {
-	spawn(spawn) {
-		throw new NotImplementedError("MineDrop.spawn");
+export const roleMineDrop: Roles.MineDrop.Role = {
+	spawn(spawn, source) {
+		const memory: Roles.MineDrop.Memory = {
+			home: spawn.room.name,
+			recycleSelf: false,
+			source,
+		};
+		const body: Array<BodyPartConstant> = [MOVE, WORK, WORK, WORK, WORK, WORK];
+		while (getBodyCost(body) > spawn.room.energyCapacityAvailable) {
+			body.pop();
+		}
+		if (body.length < 2) {
+			return ERR_NOT_ENOUGH_RESOURCES;
+		} else {
+			return spawn.newCreep(
+				body,
+				{ memory },
+				{
+					role: ROLE_MINE_DROP,
+				},
+			);
+		}
 	},
 	run(this) {
+		const source = Game.getObjectById(this.memory.source)!;
+
+		const err = this.harvest(source);
+
+		if (err === ERR_NOT_IN_RANGE) {
+			this.travelTo(source);
+			this.harvest(source);
+		}
+
+		return err;
 	},
 };

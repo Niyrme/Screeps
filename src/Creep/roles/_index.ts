@@ -1,16 +1,17 @@
-export { roleBuild } from "./build.ts";
-export { roleExplore } from "./explore.ts";
-export { roleHaul } from "./haul.ts";
-export { roleManage } from "./manage.ts";
-export { roleMineDrop } from "./mine-drop.ts";
-export { roleMineLink } from "./mine-link.ts";
-export { roleRepair } from "./repair.ts";
-export { roleUpgrade } from "./upgrade.ts";
+export * from "./build.ts";
+export * from "./explore.ts";
+export * from "./harvest.ts";
+export * from "./haul.ts";
+export * from "./manage.ts";
+export * from "./mine-drop.ts";
+export * from "./mine-link.ts";
+export * from "./repair.ts";
+export * from "./upgrade.ts";
 
 declare global {
 	export namespace Roles {
 		export interface Role<C extends Creep> {
-			spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType;
+			spawn: Function;
 
 			run(this: C): ScreepsReturnCode;
 		}

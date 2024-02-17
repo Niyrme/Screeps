@@ -9,16 +9,22 @@ declare global {
 			export interface Creep extends BaseCreep {
 				readonly memory: Memory;
 			}
+
+			export interface Role extends Roles.Role<Creep> {
+				spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType;
+			}
 		}
 	}
 }
 
-registerRole("repair");
+export const ROLE_REPAIR = "repair";
+registerRole(ROLE_REPAIR);
 
-export const roleRepair: Roles.Role<Roles.Repair.Creep> = {
+export const roleRepair: Roles.Repair.Role = {
 	spawn(spawn) {
-		throw new NotImplementedError("Repair.spawn");
+		throw new NotImplementedError("roleRepair.spawn");
 	},
 	run(this) {
+		throw new NotImplementedError("roleRepair.run");
 	},
 };

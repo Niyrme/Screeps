@@ -1,3 +1,5 @@
+import { Logging } from "./Logging.ts";
+
 export const ErrorMap: Record<ScreepsReturnCode, string> = {
 	[OK]: "OK",
 	[ERR_NOT_OWNER]: "ERR_NOT_OWNER",
@@ -29,5 +31,17 @@ export class NotImplementedError extends Error {
 export class UnreachableError extends Error {
 	constructor(context: string) {
 		super(`UNREACHABLE: ${context}`);
+	}
+}
+
+export function catchNotImplemented(fn: () => void) {
+	try {
+		fn();
+	} catch (err) {
+		if (err instanceof NotImplementedError) {
+			Logging.error(err);
+		} else {
+			throw err;
+		}
 	}
 }

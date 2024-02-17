@@ -1,4 +1,4 @@
-import { Logging } from "util";
+import { catchNotImplemented, Logging } from "util";
 import { roomConstruction } from "./construction.ts";
 import { roomDefense } from "./defense.ts";
 import { roomHeal } from "./heal.ts";
@@ -21,22 +21,33 @@ export function manageRoom(room: Room) {
 	}
 
 	room.visual.text(
-		`${room.controller.progress / room.controller.progressTotal}%`,
+		`${((1 - (room.controller.progress / room.controller.progressTotal)) * 100).toFixed(3)}%`,
 		room.controller.pos.x,
 		room.controller.pos.y - 1,
 		{ align: "center" },
 	);
+
+	for (const spawn of room.find(FIND_MY_SPAWNS, { filter: s => !!s.spawning })) {
+		room.visual.text(
+			`${spawn.spawning!.name} | ${((1 - (spawn.spawning!.remainingTime / spawn.spawning!.needTime)) * 100).toFixed(1)}%`,
+			spawn.pos.x,
+			spawn.pos.y - 1,
+			{ align: "center" },
+		);
+	}
 
 	if (!(room.name in Game.flags)) {
 		Logging.error(`${room} is missing center flag`);
 		return;
 	}
 
-	roomDefense(room);
-	roomHeal(room);
-	roomRepair(room);
+	catchNotImplemented(() => roomDefense(room));
+	catchNotImplemented(() => roomDefense(room));
+	catchNotImplemented(() => roomHeal(room));
+	catchNotImplemented(() => roomRepair(room));
+
 	if (Game.time % 500 === 0) {
-		roomConstruction(room);
+		catchNotImplemented(() => roomConstruction(room));
 	}
-	roomSpawning(room);
+	catchNotImplemented(() => roomSpawning(room));
 }

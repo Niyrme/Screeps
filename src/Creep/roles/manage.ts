@@ -9,15 +9,20 @@ declare global {
 			export interface Creep extends BaseCreep {
 				readonly memory: Memory;
 			}
+
+			export interface Role extends Roles.Role<Creep> {
+				spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType;
+			}
 		}
 	}
 }
 
-registerRole("manage");
+export const ROLE_MANAGE = "manage";
+registerRole(ROLE_MANAGE);
 
-export const roleManage: Roles.Role<Roles.Manage.Creep> = {
+export const roleManage: Roles.Manage.Role = {
 	spawn(spawn) {
-		throw new NotImplementedError("Manage.spawn");
+		throw new NotImplementedError("roleManage.spawn");
 	},
 	run(this) {
 		const flag = Game.flags[this.room.name]!;
@@ -26,5 +31,6 @@ export const roleManage: Roles.Role<Roles.Manage.Creep> = {
 				range: 0,
 			});
 		}
+		throw new NotImplementedError("roleManage.run");
 	},
 };

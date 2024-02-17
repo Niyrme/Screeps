@@ -5,6 +5,7 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import swc from "@rollup/plugin-swc";
 import fs from "node:fs";
 import path from "node:path";
+import clear from "rollup-plugin-clear";
 import screeps from "./rollup/rollup-plugin-screeps";
 import screepsDeploy from "./rollup/rollup-plugin-screeps-deploy";
 
@@ -39,6 +40,9 @@ const options = {
 	},
 	external: modules,
 	plugins: [
+		clear({
+			targets: ["dist"],
+		}),
 		json({
 			preferConst: true,
 			compact: true,
