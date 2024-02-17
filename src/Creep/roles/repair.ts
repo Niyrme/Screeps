@@ -2,7 +2,7 @@ import { NotImplementedError, registerRole } from "util";
 
 declare global {
 	export namespace Roles {
-		export namespace Explore {
+		export namespace Repair {
 			export interface Memory extends CreepMemory {
 			}
 
@@ -13,11 +13,11 @@ declare global {
 	}
 }
 
-registerRole("explore");
+registerRole("repair");
 
-export const roleExplore: Roles.Role<Roles.Explore.Creep> = {
+export const roleRepair: Roles.Role<Roles.Repair.Creep> = {
 	spawn(spawn) {
-		throw new NotImplementedError("Explore.spawn");
+		throw new NotImplementedError("Repair.spawn");
 	},
 	run(this) {
 	},

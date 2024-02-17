@@ -2,8 +2,9 @@ import { NotImplementedError, registerRole } from "util";
 
 declare global {
 	export namespace Roles {
-		export namespace Explore {
+		export namespace Build {
 			export interface Memory extends CreepMemory {
+				site: null | Id<ConstructionSite>;
 			}
 
 			export interface Creep extends BaseCreep {
@@ -13,11 +14,11 @@ declare global {
 	}
 }
 
-registerRole("explore");
+registerRole("build");
 
-export const roleExplore: Roles.Role<Roles.Explore.Creep> = {
+export const roleBuild: Roles.Role<Roles.Build.Creep> = {
 	spawn(spawn) {
-		throw new NotImplementedError("Explore.spawn");
+		throw new NotImplementedError("Build.spawn");
 	},
 	run(this) {
 	},

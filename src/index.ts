@@ -1,5 +1,6 @@
 import "lib";
 import "RoomPosition";
+import "StructureSpawn";
 import { manageCreep } from "Creep";
 import { manageRoom } from "Room";
 

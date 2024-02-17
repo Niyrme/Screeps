@@ -1,10 +1,14 @@
 import { ErrorcodeToString, Logging } from "util";
 
 declare global {
-	interface RoomPosition {
-		tryPutConstructionSite(type: STRUCTURE_SPAWN, spawnName: string): OK | ERR_BUSY | ERR_INVALID_TARGET | ERR_FULL | ERR_INVALID_ARGS | ERR_RCL_NOT_ENOUGH;
+	export namespace RoomPosition {
+		export type TryPutConstructionSiteReturnCode = OK | ERR_BUSY | ERR_INVALID_TARGET | ERR_FULL | ERR_INVALID_ARGS | ERR_RCL_NOT_ENOUGH
+	}
 
-		tryPutConstructionSite(type: Exclude<BuildableStructureConstant, STRUCTURE_SPAWN>, spawnName?: never): OK | ERR_BUSY | ERR_INVALID_TARGET | ERR_FULL | ERR_INVALID_ARGS | ERR_RCL_NOT_ENOUGH;
+	interface RoomPosition {
+		tryPutConstructionSite(type: STRUCTURE_SPAWN, spawnName: string): RoomPosition.TryPutConstructionSiteReturnCode;
+
+		tryPutConstructionSite(type: Exclude<BuildableStructureConstant, STRUCTURE_SPAWN>, spawnName?: never): RoomPosition.TryPutConstructionSiteReturnCode;
 	}
 }
 

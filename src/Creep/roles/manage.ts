@@ -1,20 +1,30 @@
-declare global {
-	export namespace Creep {
-		export namespace Roles {
-			export namespace ManageCreep {
-				export type RoleName = "manage"
+import { NotImplementedError, registerRole } from "util";
 
-				export interface Memory extends CreepMemory {
-					readonly role: Creep.Roles.ManageCreep.RoleName;
-				}
+declare global {
+	export namespace Roles {
+		export namespace Manage {
+			export interface Memory extends CreepMemory {
 			}
 
-			export interface ManageCreep extends Creep {
-				memory: Creep.Roles.ManageCreep.Memory;
+			export interface Creep extends BaseCreep {
+				readonly memory: Memory;
 			}
 		}
 	}
 }
 
-export function roleManage(this: Creep.Roles.ManageCreep) {
-}
+registerRole("manage");
+
+export const roleManage: Roles.Role<Roles.Manage.Creep> = {
+	spawn(spawn) {
+		throw new NotImplementedError("Manage.spawn");
+	},
+	run(this) {
+		const flag = Game.flags[this.room.name]!;
+		if (!this.pos.isEqualTo(flag)) {
+			this.travelTo(flag, {
+				range: 0,
+			});
+		}
+	},
+};
