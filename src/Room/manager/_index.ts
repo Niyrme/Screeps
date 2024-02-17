@@ -30,7 +30,7 @@ export function manageRoom(room: Room) {
 	catchNotImplemented(() => roomHeal(room));
 	catchNotImplemented(() => roomRepair(room));
 
-	if (Game.time % 500 === 0) {
+	if (Game.time % 2500 === 0) {
 		catchNotImplemented(() => roomConstruction(room));
 	}
 	catchNotImplemented(() => roomSpawning(room));
@@ -44,9 +44,24 @@ export function manageRoom(room: Room) {
 
 	for (const spawn of room.find(FIND_MY_SPAWNS, { filter: s => !!s.spawning })) {
 		room.visual.text(
-			`${spawn.spawning!.name} | ${((1 - (spawn.spawning!.remainingTime / spawn.spawning!.needTime)) * 100).toFixed(1)}%`,
+			`${((1 - (spawn.spawning!.remainingTime / spawn.spawning!.needTime)) * 100).toFixed(1)}%`,
 			spawn.pos.x,
 			spawn.pos.y - 1,
+			{ align: "center" },
+		);
+	}
+	for (const id of Object.keys(room.memory.resources.energy)) {
+		const source = Game.getObjectById(id)!;
+		room.visual.text(
+			`${((source.energy / source.energyCapacity) * 100).toFixed(1)}%`,
+			source.pos.x,
+			source.pos.y - 0.5,
+			{ align: "center" },
+		);
+		room.visual.text(
+			`${source.ticksToRegeneration}t`,
+			source.pos.x,
+			source.pos.y + 1,
 			{ align: "center" },
 		);
 	}

@@ -3,6 +3,7 @@ import {
 	ROLE_HAUL,
 	ROLE_MINE_DROP,
 	ROLE_MINE_LINK,
+	ROLE_REPAIR,
 	ROLE_UPGRADE,
 	roleBuild,
 	roleHarvest,
@@ -11,6 +12,7 @@ import {
 	roleMineLink,
 	roleUpgrade,
 } from "Creep";
+import { clamp } from "util";
 
 export function roomSpawning(room: Room) {
 	const spawns = room.find(FIND_MY_SPAWNS, {
@@ -81,18 +83,35 @@ export function roomSpawning(room: Room) {
 	if (spawns.length === 0) { return; }
 
 	const upgraders = creeps.filter(c => c.decodeName().role === ROLE_UPGRADE) as Array<Roles.Upgrade.Creep>;
-	for (let i = upgraders.length; i < 9 - room.controller!.level; i++) {
+	for (let i = upgraders.length; i < clamp(9 - room.controller!.level, 1, 3); i++) {
 		if (spawns.length === 0) { return; }
 		handleSpawnError(roleUpgrade.spawn(spawns[0]));
 	}
 
 	const constructionSites = room.find(FIND_MY_CONSTRUCTION_SITES);
 	if (constructionSites.length !== 0) {
-		const maxBuilders = Math.max(3, Math.ceil(Math.sqrt(constructionSites.length)));
 		const builders = creeps.filter(c => c.decodeName().role === ROLE_BUILD) as Array<Roles.Build.Creep>;
-		for (let i = 0; i < maxBuilders - builders.length; i++) {
+		for (
+			let i = 0;
+			i < clamp(Math.ceil(Math.sqrt(constructionSites.length)) - builders.length, 0, 3);
+			i++
+		) {
 			if (spawns.length === 0) { return; }
 			handleSpawnError(roleBuild.spawn(spawns[0]));
+		}
+	}
+
+	const damagedStructures = room.find(FIND_STRUCTURES, {
+		filter: s => s.structureType !== STRUCTURE_WALL && s.hits < s.hitsMax,
+	});
+	if (damagedStructures.length !== 0) {
+		const repairers = creeps.filter(c => c.decodeName().role === ROLE_REPAIR) as Array<Roles.Repair.Creep>;
+		for (
+			let i = 0;
+			i < clamp(Math.ceil(Math.sqrt(damagedStructures.length)) - repairers.length, 0, 3);
+			i++
+		) {
+			if (spawns.length !== 0) {return;}
 		}
 	}
 }

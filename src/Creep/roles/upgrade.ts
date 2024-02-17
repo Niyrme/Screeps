@@ -47,43 +47,29 @@ export const roleUpgrade: Roles.Upgrade.Role = {
 			},
 		);
 	},
-	run(this) {
-		if (this.memory.gather && this.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
-			this.memory.gather = false;
-		} else if ((!this.memory.gather) && this.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
-			this.memory.gather = true;
+	run(creep) {
+		if (creep.memory.gather && creep.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
+			creep.memory.gather = false;
+		} else if ((!creep.memory.gather) && creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
+			creep.memory.gather = true;
 		}
 
-		if (this.memory.gather) {
-			const resource = this.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
-				filter: r => r.resourceType === RESOURCE_ENERGY && r.amount >= this.store.getFreeCapacity(RESOURCE_ENERGY),
-			});
-			if (resource) {
-				const err = this.pickup(resource);
-
-				if (err === ERR_NOT_IN_RANGE) {
-					this.travelTo(resource);
-					this.pickup(resource);
-				}
-
-				return err;
-			}
+		if (creep.memory.gather) {
+			return creep.gatherEnergy();
 		} else {
-			if (!this.room.controller?.my) {
-				Logging.error(`${this} could not find controller`);
+			if (!creep.room.controller?.my) {
+				Logging.error(`${creep} could not find controller`);
 				return ERR_NOT_FOUND;
 			}
 
-			const err = this.upgradeController(this.room.controller);
+			const err = creep.upgradeController(creep.room.controller);
 
 			if (err === ERR_NOT_IN_RANGE) {
-				this.travelTo(this.room.controller, { range: UPGRADE_CONTROLLER_RANGE });
-				this.upgradeController(this.room.controller);
+				creep.travelTo(creep.room.controller, { range: UPGRADE_CONTROLLER_RANGE });
+				creep.upgradeController(creep.room.controller);
 			}
 
 			return err;
 		}
-
-		return ERR_NOT_FOUND;
 	},
 };

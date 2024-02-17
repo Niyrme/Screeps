@@ -65,31 +65,31 @@ export function manageCreep(creep: Creep) {
 	catchNotImplemented(() => {
 		switch (role) {
 			case ROLE_BUILD:
-				roleBuild.run.apply(creep as Roles.Build.Creep);
+				roleBuild.run(creep as Roles.Build.Creep);
 				break;
 			case ROLE_EXPLORE:
-				roleExplore.run.apply(creep as Roles.Explore.Creep);
+				roleExplore.run(creep as Roles.Explore.Creep);
 				break;
 			case ROLE_HARVEST:
-				roleHarvest.run.apply(creep as Roles.Harvest.Creep);
+				roleHarvest.run(creep as Roles.Harvest.Creep);
 				break;
 			case ROLE_HAUL:
-				roleHaul.run.apply(creep as Roles.Haul.Creep);
+				roleHaul.run(creep as Roles.Haul.Creep);
 				break;
 			case ROLE_MANAGE:
-				roleManage.run.apply(creep as Roles.Manage.Creep);
+				roleManage.run(creep as Roles.Manage.Creep);
 				break;
 			case ROLE_MINE_DROP:
-				roleMineDrop.run.apply(creep as Roles.MineDrop.Creep);
+				roleMineDrop.run(creep as Roles.MineDrop.Creep);
 				break;
 			case ROLE_MINE_LINK:
-				roleMineLink.run.apply(creep as Roles.MineLink.Creep);
+				roleMineLink.run(creep as Roles.MineLink.Creep);
 				break;
 			case ROLE_REPAIR:
-				roleRepair.run.apply(creep as Roles.Repair.Creep);
+				roleRepair.run(creep as Roles.Repair.Creep);
 				break;
 			case ROLE_UPGRADE:
-				roleUpgrade.run.apply(creep as Roles.Upgrade.Creep);
+				roleUpgrade.run(creep as Roles.Upgrade.Creep);
 				break;
 			default:
 				throw new UnreachableError(`${creep} role ${role}`);

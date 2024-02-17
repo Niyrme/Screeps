@@ -24,10 +24,10 @@ export const roleManage: Roles.Manage.Role = {
 	spawn(spawn) {
 		throw new NotImplementedError("roleManage.spawn");
 	},
-	run(this) {
-		const flag = Game.flags[this.room.name]!;
-		if (!this.pos.isEqualTo(flag)) {
-			this.travelTo(flag, {
+	run(creep) {
+		const flag = Game.flags[creep.room.name]!;
+		if (!creep.pos.isEqualTo(flag)) {
+			creep.travelTo(flag, {
 				range: 0,
 			});
 		}

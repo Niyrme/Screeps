@@ -47,24 +47,24 @@ export const roleHarvest: Roles.Harvest.Role = {
 			},
 		);
 	},
-	run(this) {
-		if (this.memory.gather && this.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
-			this.memory.gather = false;
-		} else if ((!this.memory.gather) && this.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
-			this.memory.gather = true;
+	run(creep) {
+		if (creep.memory.gather && creep.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
+			creep.memory.gather = false;
+		} else if ((!creep.memory.gather) && creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
+			creep.memory.gather = true;
 		}
 
-		if (this.memory.gather) {
-			const source = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
+		if (creep.memory.gather) {
+			const source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
 			if (source) {
-				if (!this.pos.inRangeTo(source, 1)) {
-					this.travelTo(source);
+				if (!creep.pos.inRangeTo(source, 1)) {
+					creep.travelTo(source);
 				}
 
-				return this.harvest(source);
+				return creep.harvest(source);
 			}
 		} else {
-			const dest = this.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+			const dest = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
 				filter(s) {
 					switch (s.structureType) {
 						case STRUCTURE_SPAWN:
@@ -77,11 +77,11 @@ export const roleHarvest: Roles.Harvest.Role = {
 				},
 			});
 			if (dest) {
-				if (!this.pos.inRangeTo(dest, 1)) {
-					this.travelTo(dest);
+				if (!creep.pos.inRangeTo(dest, 1)) {
+					creep.travelTo(dest);
 				}
 
-				return this.transfer(dest, RESOURCE_ENERGY);
+				return creep.transfer(dest, RESOURCE_ENERGY);
 			}
 		}
 		return ERR_NOT_FOUND;

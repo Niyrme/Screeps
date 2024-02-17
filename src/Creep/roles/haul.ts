@@ -45,29 +45,17 @@ export const roleHaul: Roles.Haul.Role = {
 			},
 		);
 	},
-	run(this) {
-		if (this.memory.gather && this.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
-			this.memory.gather = false;
-		} else if ((!this.memory.gather) && this.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
-			this.memory.gather = true;
+	run(creep) {
+		if (creep.memory.gather && creep.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
+			creep.memory.gather = false;
+		} else if ((!creep.memory.gather) && creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
+			creep.memory.gather = true;
 		}
 
-		if (this.memory.gather) {
-			const resource = this.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
-				filter: r => r.resourceType === RESOURCE_ENERGY && r.amount >= this.store.getFreeCapacity(RESOURCE_ENERGY),
-			});
-			if (resource) {
-				const err = this.pickup(resource);
-
-				if (err === ERR_NOT_IN_RANGE) {
-					this.travelTo(resource);
-					this.pickup(resource);
-				}
-
-				return err;
-			}
+		if (creep.memory.gather) {
+			return creep.gatherEnergy(false);
 		} else {
-			const dest = this.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+			const dest = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
 				filter(s) {
 					switch (s.structureType) {
 						case STRUCTURE_SPAWN:
@@ -80,11 +68,11 @@ export const roleHaul: Roles.Haul.Role = {
 				},
 			});
 			if (dest) {
-				const err = this.transfer(dest, RESOURCE_ENERGY);
+				const err = creep.transfer(dest, RESOURCE_ENERGY);
 
 				if (err === ERR_NOT_IN_RANGE) {
-					this.travelTo(dest);
-					this.transfer(dest, RESOURCE_ENERGY);
+					creep.travelTo(dest);
+					creep.transfer(dest, RESOURCE_ENERGY);
 				}
 
 				return err;

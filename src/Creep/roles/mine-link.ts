@@ -25,7 +25,7 @@ export const roleMineLink: Roles.MineLink.Role = {
 	spawn(spawn, source) {
 		throw new NotImplementedError("roleMineLink.spawn");
 	},
-	run(this) {
+	run(creep) {
 		throw new NotImplementedError("roleMineLink.run");
 	},
 };

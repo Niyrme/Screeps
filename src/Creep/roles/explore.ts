@@ -24,7 +24,7 @@ export const roleExplore: Roles.Explore.Role = {
 	spawn(spawn) {
 		throw new NotImplementedError("roleExplore.spawn");
 	},
-	run(this) {
+	run(creep) {
 		throw new NotImplementedError("roleExplore.run");
 	},
 };

@@ -13,7 +13,7 @@ declare global {
 		export interface Role<C extends Creep> {
 			spawn: Function;
 
-			run(this: C): ScreepsReturnCode;
+			run(creep: C): ScreepsReturnCode;
 		}
 	}
 }

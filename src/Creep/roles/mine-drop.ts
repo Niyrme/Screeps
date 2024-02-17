@@ -45,14 +45,14 @@ export const roleMineDrop: Roles.MineDrop.Role = {
 			);
 		}
 	},
-	run(this) {
-		const source = Game.getObjectById(this.memory.source)!;
+	run(creep) {
+		const source = Game.getObjectById(creep.memory.source)!;
 
-		const err = this.harvest(source);
+		const err = creep.harvest(source);
 
 		if (err === ERR_NOT_IN_RANGE) {
-			this.travelTo(source);
-			this.harvest(source);
+			creep.travelTo(source);
+			creep.harvest(source);
 		}
 
 		return err;
