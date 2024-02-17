@@ -54,7 +54,7 @@ export const roleHaul: Roles.Haul.Role = {
 
 		if (this.memory.gather) {
 			const resource = this.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
-				filter: r => r.resourceType === RESOURCE_ENERGY,
+				filter: r => r.resourceType === RESOURCE_ENERGY && r.amount >= this.store.getFreeCapacity(RESOURCE_ENERGY),
 			});
 			if (resource) {
 				const err = this.pickup(resource);

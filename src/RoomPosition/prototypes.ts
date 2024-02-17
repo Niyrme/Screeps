@@ -19,19 +19,19 @@ declare global {
 }
 
 RoomPosition.prototype.tryPutConstructionSite = function (type, spawnName = undefined) {
-	const occupied = this.look()
-		.filter(res => {
-			if (!!res.constructionSite) {
-				return false;
-			}
+	let occupied = false;
+	if (this.lookFor(LOOK_CONSTRUCTION_SITES).length !== 0) {
+		occupied = true;
+	}
 
-			if (!res.structure) {
-				return true;
-			} else {
-				return res.structure.structureType === STRUCTURE_RAMPART
-					|| res.structure.structureType === STRUCTURE_ROAD;
-			}
-		});
+	const structures = this.lookFor(LOOK_STRUCTURES);
+	if (structures.filter(s => s.structureType === STRUCTURE_RAMPART).length !== 0) {
+		occupied ||= type === STRUCTURE_RAMPART;
+	} else if (structures.filter(({ structureType: s }) => s !== STRUCTURE_ROAD).length !== 0) {
+		occupied ||= type === STRUCTURE_ROAD;
+	} else {
+		occupied ||= structures.length !== 0;
+	}
 
 	if (!occupied) {
 		const err = (

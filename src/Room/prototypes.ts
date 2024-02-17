@@ -24,8 +24,6 @@ declare global {
 
 	interface Room {
 		populateMemoryResources(): void;
-
-		getConstructionSite(): null | ConstructionSite;
 	}
 }
 

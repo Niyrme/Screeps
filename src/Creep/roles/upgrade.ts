@@ -56,7 +56,7 @@ export const roleUpgrade: Roles.Upgrade.Role = {
 
 		if (this.memory.gather) {
 			const resource = this.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
-				filter: r => r.resourceType === RESOURCE_ENERGY,
+				filter: r => r.resourceType === RESOURCE_ENERGY && r.amount >= this.store.getFreeCapacity(RESOURCE_ENERGY),
 			});
 			if (resource) {
 				const err = this.pickup(resource);
@@ -77,7 +77,7 @@ export const roleUpgrade: Roles.Upgrade.Role = {
 			const err = this.upgradeController(this.room.controller);
 
 			if (err === ERR_NOT_IN_RANGE) {
-				this.travelTo(this.room.controller,{ range: UPGRADE_CONTROLLER_RANGE });
+				this.travelTo(this.room.controller, { range: UPGRADE_CONTROLLER_RANGE });
 				this.upgradeController(this.room.controller);
 			}
 

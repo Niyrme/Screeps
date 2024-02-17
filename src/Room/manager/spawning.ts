@@ -1,15 +1,16 @@
 import {
+	ROLE_BUILD,
 	ROLE_HAUL,
 	ROLE_MINE_DROP,
 	ROLE_MINE_LINK,
 	ROLE_UPGRADE,
+	roleBuild,
 	roleHarvest,
 	roleHaul,
 	roleMineDrop,
 	roleMineLink,
 	roleUpgrade,
 } from "Creep";
-import { ErrorcodeToString, Logging } from "util";
 
 export function roomSpawning(room: Room) {
 	const spawns = room.find(FIND_MY_SPAWNS, {
@@ -27,7 +28,6 @@ export function roomSpawning(room: Room) {
 	}
 
 	const handleSpawnError = (err: StructureSpawn.SpawnCreepReturnType, shiftOnNoEnergy = false) => {
-		Logging.debug(`handleSpawnError(${ErrorcodeToString(err)})`);
 		switch (err) {
 			case OK:
 				spawns.shift();
@@ -84,5 +84,15 @@ export function roomSpawning(room: Room) {
 	for (let i = upgraders.length; i < 9 - room.controller!.level; i++) {
 		if (spawns.length === 0) { return; }
 		handleSpawnError(roleUpgrade.spawn(spawns[0]));
+	}
+
+	const constructionSites = room.find(FIND_MY_CONSTRUCTION_SITES);
+	if (constructionSites.length !== 0) {
+		const maxBuilders = Math.max(3, Math.ceil(Math.sqrt(constructionSites.length)));
+		const builders = creeps.filter(c => c.decodeName().role === ROLE_BUILD) as Array<Roles.Build.Creep>;
+		for (let i = 0; i < maxBuilders - builders.length; i++) {
+			if (spawns.length === 0) { return; }
+			handleSpawnError(roleBuild.spawn(spawns[0]));
+		}
 	}
 }

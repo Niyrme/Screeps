@@ -20,8 +20,12 @@ export function roomConstruction(room: Room) {
 						baseFlag.pos.x - bunkers.bunkerRound.cx + x,
 						baseFlag.pos.y - bunkers.bunkerRound.cy + y,
 					);
+
 					if (structureType === STRUCTURE_SPAWN) {
-						pos?.tryPutConstructionSite(structureType, `${room.name}-${room.find(FIND_MY_SPAWNS).length + 1}`);
+						pos?.tryPutConstructionSite(
+							structureType,
+							`${room.name}-${room.find(FIND_MY_SPAWNS).length + 1}`,
+						);
 					} else {
 						pos?.tryPutConstructionSite(structureType);
 					}

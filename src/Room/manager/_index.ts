@@ -20,22 +20,6 @@ export function manageRoom(room: Room) {
 		return;
 	}
 
-	room.visual.text(
-		`${((1 - (room.controller.progress / room.controller.progressTotal)) * 100).toFixed(3)}%`,
-		room.controller.pos.x,
-		room.controller.pos.y - 1,
-		{ align: "center" },
-	);
-
-	for (const spawn of room.find(FIND_MY_SPAWNS, { filter: s => !!s.spawning })) {
-		room.visual.text(
-			`${spawn.spawning!.name} | ${((1 - (spawn.spawning!.remainingTime / spawn.spawning!.needTime)) * 100).toFixed(1)}%`,
-			spawn.pos.x,
-			spawn.pos.y - 1,
-			{ align: "center" },
-		);
-	}
-
 	if (!(room.name in Game.flags)) {
 		Logging.error(`${room} is missing center flag`);
 		return;
@@ -50,4 +34,20 @@ export function manageRoom(room: Room) {
 		catchNotImplemented(() => roomConstruction(room));
 	}
 	catchNotImplemented(() => roomSpawning(room));
+
+	room.visual.text(
+		`${((room.controller.progress / room.controller.progressTotal) * 100).toFixed(3)}%`,
+		room.controller.pos.x,
+		room.controller.pos.y - 1,
+		{ align: "center" },
+	);
+
+	for (const spawn of room.find(FIND_MY_SPAWNS, { filter: s => !!s.spawning })) {
+		room.visual.text(
+			`${spawn.spawning!.name} | ${((1 - (spawn.spawning!.remainingTime / spawn.spawning!.needTime)) * 100).toFixed(1)}%`,
+			spawn.pos.x,
+			spawn.pos.y - 1,
+			{ align: "center" },
+		);
+	}
 }
