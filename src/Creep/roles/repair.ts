@@ -66,6 +66,8 @@ export const roleRepair: Roles.Repair.Role = {
 				structure = Game.getObjectById(creep.memory.structure);
 				if (structure && !(structure.hits < structure.hitsMax)) {
 					structure = null;
+				} else if (structure?.structureType === STRUCTURE_RAMPART) {
+					structure = null;
 				} else if (structure?.structureType === STRUCTURE_WALL) {
 					structure = null;
 				}
@@ -93,6 +95,15 @@ export const roleRepair: Roles.Repair.Role = {
 						const roadsContainers = damagedStructures.filter(({ structureType: s }) => s === STRUCTURE_CONTAINER || s === STRUCTURE_ROAD) as Array<StructureContainer | StructureRoad>;
 						if (roadsContainers.length !== 0) {
 							structure = creep.pos.findClosestByPath(roadsContainers, { ignoreCreeps: true });
+						}
+					}
+
+					if (!structure) {
+						const ramparts = damagedStructures.filter(({ structureType: s }) => s === STRUCTURE_RAMPART) as Array<StructureRampart>;
+						for (let i = 0; i < 1; i += 0.0001) {
+							if ((structure = _.find(ramparts, rampart => (rampart.hits / rampart.hitsMax) < i))) {
+								break;
+							}
 						}
 					}
 

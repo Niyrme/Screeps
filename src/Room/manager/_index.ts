@@ -44,7 +44,7 @@ export function manageRoom(room: Room) {
 
 	for (const spawn of room.find(FIND_MY_SPAWNS, { filter: s => !!s.spawning })) {
 		room.visual.text(
-			`${((1 - (spawn.spawning!.remainingTime / spawn.spawning!.needTime)) * 100).toFixed(1)}%`,
+			`${((1 - ((spawn.spawning!.remainingTime + 1) / spawn.spawning!.needTime)) * 100).toFixed(1)}%`,
 			spawn.pos.x,
 			spawn.pos.y - 1,
 			{ align: "center" },
@@ -59,7 +59,7 @@ export function manageRoom(room: Room) {
 			{ align: "center" },
 		);
 		room.visual.text(
-			`${source.ticksToRegeneration || -1}t`,
+			`${(source.ticksToRegeneration - 1) || 0}T`,
 			source.pos.x,
 			source.pos.y + 1,
 			{ align: "center" },

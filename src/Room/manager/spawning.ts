@@ -86,7 +86,7 @@ export function roomSpawning(room: Room) {
 	if (spawns.length === 0) { return; }
 
 	const upgraders = creeps.filter(c => c.decodeName().role === ROLE_UPGRADE) as Array<Roles.Upgrade.Creep>;
-	for (let i = upgraders.length; i < Math.clamp(9 - room.controller!.level, 1, 3); i++) {
+	for (let i = upgraders.length; i < Math.clamp(9 - room.controller!.level, 1, 5); i++) {
 		if (spawns.length === 0) { return; }
 		handleSpawnError(roleUpgrade.spawn(spawns[0]));
 	}

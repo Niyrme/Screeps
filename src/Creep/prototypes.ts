@@ -76,17 +76,6 @@ function findEnergySource(creep: Creep, checkHasEnough: boolean, fromStorage: bo
 		return creep.pos.findClosestByPath(ruins);
 	}
 
-	const dropped = room.find(FIND_DROPPED_RESOURCES, {
-		filter({ resourceType, amount }) {
-			return resourceType === RESOURCE_ENERGY && (
-				checkHasEnough ? amount >= freeCap : amount !== 0
-			);
-		},
-	}) as Array<Resource<RESOURCE_ENERGY>>;
-	if (dropped.length !== 0) {
-		return creep.pos.findClosestByPath(dropped);
-	}
-
 	const containers = room.find(FIND_STRUCTURES, {
 		filter(s) {
 			if (s.structureType !== STRUCTURE_CONTAINER) { return false; }
@@ -96,6 +85,17 @@ function findEnergySource(creep: Creep, checkHasEnough: boolean, fromStorage: bo
 	}) as Array<StructureContainer>;
 	if (containers.length !== 0) {
 		return creep.pos.findClosestByPath(containers);
+	}
+
+	const dropped = room.find(FIND_DROPPED_RESOURCES, {
+		filter({ resourceType, amount }) {
+			return resourceType === RESOURCE_ENERGY && (
+				checkHasEnough ? amount >= freeCap : amount !== 0
+			);
+		},
+	}) as Array<Resource<RESOURCE_ENERGY>>;
+	if (dropped.length !== 0) {
+		return creep.pos.findClosestByPath(dropped);
 	}
 
 	return null;

@@ -15,17 +15,18 @@ function findDamagedStructure(room: Room): null | AnyStructure {
 		return null;
 	}
 
-	const reduceDamaged = (weakest: AnyStructure, current: AnyStructure) => {
-		return (current.hitsMax - current.hits) < (weakest.hitsMax - weakest.hits)
-			? current
-			: weakest;
-	};
-
 	const notRampart = structures.filter(s => s.structureType !== STRUCTURE_RAMPART);
 	if (notRampart.length !== 0) {
-		return notRampart.reduce(reduceDamaged);
+		return notRampart.reduce(function (weakest, current) {
+			if ((current.hitsMax - current.hits) < (weakest.hitsMax - weakest.hits)) {
+				return current;
+			} else {
+				return weakest;
+			}
+		});
 	} else {
-		return structures.reduce(reduceDamaged);
+		// ramparts
+		return structures.reduce((weakest, current) => (current.hits < weakest.hits) ? current : weakest);
 	}
 }
 
