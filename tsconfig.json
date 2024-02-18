@@ -11,26 +11,8 @@
 		"esModuleInterop": true,
 		"resolveJsonModule": true,
 		"paths": {
-			"Creep": [
-				"src/Creep/_index.ts"
-			],
-			"Room": [
-				"src/Room/_index.ts"
-			],
-			"RoomPosition": [
-				"src/RoomPosition/_index.ts"
-			],
-			"StructureSpawn": [
-				"src/StructureSpawn/_index.ts"
-			],
-			"lib": [
-				"src/lib/_index.ts"
-			],
-			"templates": [
-				"src/templates/_index.ts"
-			],
-			"util": [
-				"src/util/_index.ts"
+			"*": [
+				"src/*/_index.ts"
 			]
 		}
 	},

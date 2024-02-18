@@ -1,3 +1,4 @@
+import "prototypes";
 import "lib";
 import "RoomPosition";
 import "StructureSpawn";

@@ -35,9 +35,11 @@ export const roleRepair: Roles.Repair.Role = {
 		};
 
 		const baseBody: Array<BodyPartConstant> = [WORK, CARRY, MOVE];
-		const size = Math.max(1, Math.floor(
-			spawn.room.energyAvailable / getBodyCost(baseBody),
-		));
+		const size = Math.clamp(
+			Math.floor(spawn.room.energyCapacityAvailable / getBodyCost(baseBody)),
+			1,
+			5,
+		);
 
 		const body = _.flatten(_.fill(new Array(size), baseBody));
 
@@ -59,10 +61,12 @@ export const roleRepair: Roles.Repair.Role = {
 		if (creep.memory.gather) {
 			creep.gatherEnergy();
 		} else {
-			let structure: null | AnyStructure = null;
+			let structure: undefined | null | AnyStructure = null;
 			if (creep.memory.structure) {
 				structure = Game.getObjectById(creep.memory.structure);
 				if (structure && !(structure.hits < structure.hitsMax)) {
+					structure = null;
+				} else if (structure?.structureType === STRUCTURE_WALL) {
 					structure = null;
 				}
 			}
@@ -98,13 +102,25 @@ export const roleRepair: Roles.Repair.Role = {
 				}
 			}
 
+			if (!structure) {
+				const walls = creep.room.find(FIND_STRUCTURES, {
+					filter: s => s.structureType === STRUCTURE_WALL,
+				}) as Array<StructureWall>;
+
+				for (let i = 0; i < 1; i += 0.0001) {
+					if ((structure = _.find(walls, wall => (wall.hits / wall.hitsMax) < i))) {
+						break;
+					}
+				}
+			}
+
 			if (structure) {
 				creep.memory.structure = structure.id;
 
-				let err = creep.repair(structure);
+				const err = creep.repair(structure);
 				if (err === ERR_NOT_IN_RANGE) {
 					creep.travelTo(structure, { range: REPAIR_STRUCTURE_RANGE });
-					err = creep.repair(structure);
+					return creep.repair(structure);
 				}
 				return err;
 			}

@@ -33,9 +33,13 @@ export const roleHarvest: Roles.Harvest.Role = {
 		const baseBody: Array<BodyPartConstant> = [WORK, CARRY, MOVE];
 		const baseBodyCost = getBodyCost(baseBody);
 
-		const size = Math.max(1, Math.floor(
-			(bootstrap ? spawn.room.energyAvailable : spawn.room.energyCapacityAvailable) / baseBodyCost,
-		));
+		const size = Math.clamp(
+			Math.floor(
+				(bootstrap ? spawn.room.energyAvailable : spawn.room.energyCapacityAvailable) / baseBodyCost,
+			),
+			1,
+			5,
+		);
 
 		const body = _.flatten(_.fill(new Array(size), baseBody));
 
@@ -57,10 +61,10 @@ export const roleHarvest: Roles.Harvest.Role = {
 		if (creep.memory.gather) {
 			const source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
 			if (source) {
-				let err = creep.harvest(source);
+				const err = creep.harvest(source);
 				if (err === ERR_NOT_IN_RANGE) {
 					creep.travelTo(source);
-					err = creep.harvest(source);
+					return creep.harvest(source);
 				}
 				return err;
 			}
@@ -78,10 +82,10 @@ export const roleHarvest: Roles.Harvest.Role = {
 				},
 			}) as null | StructureSpawn | StructureExtension | StructureTower;
 			if (dest) {
-				let err = creep.transfer(dest, RESOURCE_ENERGY);
+				const err = creep.transfer(dest, RESOURCE_ENERGY);
 				if (err === ERR_NOT_IN_RANGE) {
 					creep.travelTo(dest);
-					err = creep.transfer(dest, RESOURCE_ENERGY);
+					return creep.transfer(dest, RESOURCE_ENERGY);
 				}
 				return err;
 			}

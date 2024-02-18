@@ -1,4 +1,4 @@
-import { clamp, registerRole } from "util";
+import { registerRole } from "util";
 import { getBodyCost } from "../util.ts";
 
 declare global {
@@ -31,7 +31,7 @@ export const roleHaul: Roles.Haul.Role = {
 		};
 
 		const baseBody: Array<BodyPartConstant> = [CARRY, MOVE];
-		const size = clamp(
+		const size = Math.clamp(
 			Math.floor(
 				(bootstrap ? spawn.room.energyAvailable : spawn.room.energyCapacityAvailable)
 				/ getBodyCost(baseBody),
@@ -73,10 +73,10 @@ export const roleHaul: Roles.Haul.Role = {
 				},
 			});
 			if (dest) {
-				let err = creep.transfer(dest, RESOURCE_ENERGY);
+				const err = creep.transfer(dest, RESOURCE_ENERGY);
 				if (err === ERR_NOT_IN_RANGE) {
 					creep.travelTo(dest);
-					err = creep.transfer(dest, RESOURCE_ENERGY);
+					return creep.transfer(dest, RESOURCE_ENERGY);
 				}
 				return err;
 			}

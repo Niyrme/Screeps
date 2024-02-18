@@ -33,9 +33,13 @@ export const roleUpgrade: Roles.Upgrade.Role = {
 		};
 
 		const baseBody: Array<BodyPartConstant> = [WORK, CARRY, MOVE];
-		const size = Math.max(1, Math.floor(
-			spawn.room.energyAvailable / getBodyCost(baseBody),
-		));
+		const size = Math.clamp(
+			Math.floor(
+				spawn.room.energyCapacityAvailable / getBodyCost(baseBody),
+			),
+			1,
+			5,
+		);
 
 		const body = _.flatten(_.fill(new Array(size), baseBody));
 
@@ -62,10 +66,10 @@ export const roleUpgrade: Roles.Upgrade.Role = {
 				return ERR_NOT_FOUND;
 			}
 
-			let err = creep.upgradeController(creep.room.controller);
+			const err = creep.upgradeController(creep.room.controller);
 			if (err === ERR_NOT_IN_RANGE) {
 				creep.travelTo(creep.room.controller, { range: UPGRADE_CONTROLLER_RANGE });
-				err = creep.upgradeController(creep.room.controller);
+				return creep.upgradeController(creep.room.controller);
 			}
 			return err;
 		}

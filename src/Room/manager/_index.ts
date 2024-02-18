@@ -59,7 +59,7 @@ export function manageRoom(room: Room) {
 			{ align: "center" },
 		);
 		room.visual.text(
-			`${source.ticksToRegeneration}t`,
+			`${source.ticksToRegeneration || -1}t`,
 			source.pos.x,
 			source.pos.y + 1,
 			{ align: "center" },

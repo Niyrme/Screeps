@@ -35,9 +35,11 @@ export const roleBuild: Roles.Build.Role = {
 		};
 
 		const baseBody: Array<BodyPartConstant> = [WORK, CARRY, MOVE];
-		const size = Math.max(1, Math.floor(
-			spawn.room.energyAvailable / getBodyCost(baseBody),
-		));
+		const size = Math.clamp(
+			Math.floor(spawn.room.energyCapacityAvailable / getBodyCost(baseBody)),
+			1,
+			5,
+		);
 
 		const body = _.flatten(_.fill(new Array(size), baseBody));
 
@@ -74,10 +76,10 @@ export const roleBuild: Roles.Build.Role = {
 			if (site) {
 				creep.memory.site = site.id;
 
-				let err = creep.build(site);
+				const err = creep.build(site);
 				if (err === ERR_NOT_IN_RANGE) {
 					creep.travelTo(site, { range: BUILD_CONSTRUCTIONSITE_RANGE });
-					err = creep.build(site);
+					return creep.build(site);
 				}
 				return err;
 			} else {

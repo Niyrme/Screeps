@@ -6,6 +6,7 @@ declare global {
 		export namespace MineDrop {
 			export interface Memory extends CreepMemory {
 				readonly source: Id<Source>;
+				atSource: boolean;
 			}
 
 			export interface Creep extends BaseCreep {
@@ -28,8 +29,9 @@ export const roleMineDrop: Roles.MineDrop.Role = {
 			home: spawn.room.name,
 			recycleSelf: false,
 			source,
+			atSource: false,
 		};
-		const body: Array<BodyPartConstant> = [MOVE, WORK, WORK, WORK, WORK, WORK];
+		const body: Array<BodyPartConstant> = [MOVE, WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE];
 		while (getBodyCost(body) > spawn.room.energyCapacityAvailable) {
 			body.pop();
 		}
@@ -48,20 +50,25 @@ export const roleMineDrop: Roles.MineDrop.Role = {
 	run(creep) {
 		const source = Game.getObjectById(creep.memory.source)!;
 
-		const [container] = source.pos.findInRange(
-			FIND_STRUCTURES,
-			1,
-			{ filter: ({ structureType: t }) => t === STRUCTURE_CONTAINER },
-		) as Array<StructureContainer>;
-		if (container && !container.pos.isEqualTo(creep.pos)) {
-			creep.travelTo(container, { range: 0 });
-		}
+		if (creep.memory.atSource) {
+			return creep.harvest(source);
+		} else {
+			const [container] = source.pos.findInRange(
+				FIND_STRUCTURES,
+				1,
+				{ filter: ({ structureType: t }) => t === STRUCTURE_CONTAINER },
+			) as Array<StructureContainer>;
+			if (container && !container.pos.isEqualTo(creep.pos)) {
+				creep.travelTo(container, { range: 0 });
+				return creep.harvest(source);
+			}
 
-		let err = creep.harvest(source);
-		if (err === ERR_NOT_IN_RANGE) {
-			creep.travelTo(source);
-			err = creep.harvest(source);
+			const err = creep.harvest(source);
+			if (err === ERR_NOT_IN_RANGE) {
+				creep.travelTo(source);
+				return creep.harvest(source);
+			}
+			return err;
 		}
-		return err;
 	},
 };

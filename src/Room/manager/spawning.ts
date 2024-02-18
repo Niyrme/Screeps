@@ -13,7 +13,7 @@ import {
 	roleRepair,
 	roleUpgrade,
 } from "Creep";
-import { clamp, ErrorcodeToString, Logging } from "util";
+import { ErrorcodeToString, Logging } from "util";
 
 export function roomSpawning(room: Room) {
 	const spawns = room.find(FIND_MY_SPAWNS, {
@@ -86,7 +86,7 @@ export function roomSpawning(room: Room) {
 	if (spawns.length === 0) { return; }
 
 	const upgraders = creeps.filter(c => c.decodeName().role === ROLE_UPGRADE) as Array<Roles.Upgrade.Creep>;
-	for (let i = upgraders.length; i < clamp(9 - room.controller!.level, 1, 3); i++) {
+	for (let i = upgraders.length; i < Math.clamp(9 - room.controller!.level, 1, 3); i++) {
 		if (spawns.length === 0) { return; }
 		handleSpawnError(roleUpgrade.spawn(spawns[0]));
 	}
@@ -98,7 +98,7 @@ export function roomSpawning(room: Room) {
 		const repairers = creeps.filter(c => c.decodeName().role === ROLE_REPAIR) as Array<Roles.Repair.Creep>;
 		for (
 			let i = repairers.length;
-			i < clamp(Math.ceil(Math.sqrt(damagedStructures.length)), 0, 3);
+			i < Math.clamp(Math.ceil(Math.sqrt(damagedStructures.length)), 0, 3);
 			i++
 		) {
 			if (spawns.length === 0) {return;}
@@ -112,7 +112,7 @@ export function roomSpawning(room: Room) {
 		const builders = creeps.filter(c => c.decodeName().role === ROLE_BUILD) as Array<Roles.Build.Creep>;
 		for (
 			let i = builders.length;
-			i < clamp(Math.ceil(Math.sqrt(constructionSites.length)), 0, 3);
+			i < Math.clamp(Math.ceil(Math.sqrt(constructionSites.length)), 0, 3);
 			i++
 		) {
 			if (spawns.length === 0) { return; }
