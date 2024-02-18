@@ -19,18 +19,25 @@ declare global {
 }
 
 RoomPosition.prototype.tryPutConstructionSite = function (type, spawnName = undefined) {
-	let occupied = false;
-	if (this.lookFor(LOOK_CONSTRUCTION_SITES).length !== 0) {
-		occupied = true;
-	}
+	let occupied = this.lookFor(LOOK_CONSTRUCTION_SITES).length !== 0;
 
-	const structures = this.lookFor(LOOK_STRUCTURES);
-	if (structures.filter(s => s.structureType === STRUCTURE_RAMPART).length !== 0) {
-		occupied ||= type === STRUCTURE_RAMPART;
-	} else if (structures.filter(({ structureType: s }) => s !== STRUCTURE_ROAD).length !== 0) {
-		occupied ||= type === STRUCTURE_ROAD;
-	} else {
-		occupied ||= structures.length !== 0;
+	if (!occupied) {
+		const structures = this.lookFor(LOOK_STRUCTURES);
+		if (structures.length !== 0) {
+			switch (type) {
+				case STRUCTURE_RAMPART:
+					occupied ||= structures.filter(({ structureType: t }) => t === STRUCTURE_RAMPART).length !== 0;
+					break;
+				case STRUCTURE_ROAD:
+					occupied ||= structures.filter(({ structureType: t }) => t === STRUCTURE_ROAD).length !== 0;
+					break;
+				default:
+					occupied ||= structures.filter(({ structureType: t }) => !(
+						t === STRUCTURE_RAMPART || t === STRUCTURE_ROAD
+					)).length !== 0;
+					break;
+			}
+		}
 	}
 
 	if (!occupied) {
