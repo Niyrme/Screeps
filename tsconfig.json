@@ -8,7 +8,12 @@
 		"newLine": "lf",
 		"noUnusedLocals": true,
 		"noEmit": true,
-		"esModuleInterop": true
+		"esModuleInterop": true,
+		"paths": {
+			"*": [
+				"src/*/_index.ts"
+			]
+		}
 	},
 	"include": [
 		"src/**/*"

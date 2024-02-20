@@ -1,15 +1,18 @@
 declare global {
-	// global memory
-	interface Memory {
+	type PartialRequired<T, Keys extends keyof T> = Omit<T, Keys> & Required<Pick<T, Keys>>
+}
+
+declare global {
+	interface CustomMemory {
+		debug: boolean;
+		creepID: number;
+		jobID: number;
 	}
 
-	// creep memory
-	interface CreepMemory {
+	interface Memory extends CustomMemory {
 	}
 
-	// creep prototypes
-	interface Creep {
-	}
+	type BaseCreep = Creep
 }
 
 export {};

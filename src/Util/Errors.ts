@@ -19,3 +19,15 @@ export const ErrorMap: Record<ScreepsReturnCode, string> = {
 export function CodeToString<C extends keyof typeof ErrorMap>(errorCode: C): (typeof ErrorMap)[C] {
 	return ErrorMap[errorCode];
 }
+
+export class NotImplementedError extends Error {
+	constructor(context: string) {
+		super(`Not implemented: ${context}`);
+	}
+}
+
+export class UnreachableError extends Error {
+	constructor(context: string) {
+		super(`UNREACHABLE: ${context}`);
+	}
+}
