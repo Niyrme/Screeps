@@ -37,7 +37,11 @@ export function roomRepair(room: Room) {
 
 	const structure = findDamagedStructure(room);
 	if (structure) {
-		room.memory.repairTarget = structure.id;
+		if (structure.structureType !== STRUCTURE_RAMPART && structure.structureType !== STRUCTURE_WALL) {
+			room.memory.repairTarget = structure.id;
+		} else {
+			room.memory.repairTarget = null;
+		}
 
 		const towers = room.find(FIND_MY_STRUCTURES, {
 			filter: s => s.structureType === STRUCTURE_TOWER,

@@ -38,7 +38,7 @@ export const roleUpgrade: Roles.Upgrade.Role = {
 				spawn.room.energyCapacityAvailable / getBodyCost(baseBody),
 			),
 			1,
-			5,
+			7,
 		);
 
 		const body = _.flatten(_.fill(new Array(size), baseBody));

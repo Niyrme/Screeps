@@ -69,7 +69,7 @@ export const roleHarvest: Roles.Harvest.Role = {
 				return err;
 			}
 		} else {
-			const dest = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+			const energyStructures = creep.room.find(FIND_MY_STRUCTURES, {
 				filter(s) {
 					switch (s.structureType) {
 						case STRUCTURE_SPAWN:
@@ -80,7 +80,20 @@ export const roleHarvest: Roles.Harvest.Role = {
 							return false;
 					}
 				},
-			}) as null | StructureSpawn | StructureExtension | StructureTower;
+			}) as Array<StructureSpawn | StructureExtension | StructureTower>;
+			const spawnsExtensions = energyStructures.filter((s) => s.structureType === STRUCTURE_SPAWN || s.structureType === STRUCTURE_EXTENSION);
+
+			let dest: null | StructureSpawn | StructureExtension | StructureTower | StructureStorage = null;
+			if (spawnsExtensions.length !== 0) {
+				dest = creep.pos.findClosestByPath(spawnsExtensions);
+			} else {
+				dest = creep.pos.findClosestByPath(energyStructures);
+			}
+
+			if ((!dest) && creep.room.storage) {
+				dest = creep.room.storage;
+			}
+
 			if (dest) {
 				const err = creep.transfer(dest, RESOURCE_ENERGY);
 				if (err === ERR_NOT_IN_RANGE) {

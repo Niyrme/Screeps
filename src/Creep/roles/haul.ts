@@ -37,7 +37,7 @@ export const roleHaul: Roles.Haul.Role = {
 				/ getBodyCost(baseBody),
 			),
 			1,
-			6,
+			10,
 		);
 
 		const body = _.flatten(_.fill(new Array(size), baseBody));
@@ -60,7 +60,7 @@ export const roleHaul: Roles.Haul.Role = {
 		if (creep.memory.gather) {
 			return creep.gatherEnergy(false);
 		} else {
-			const dest = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+			const energyStructures = creep.room.find(FIND_MY_STRUCTURES, {
 				filter(s) {
 					switch (s.structureType) {
 						case STRUCTURE_SPAWN:
@@ -71,7 +71,20 @@ export const roleHaul: Roles.Haul.Role = {
 							return false;
 					}
 				},
-			});
+			}) as Array<StructureSpawn | StructureExtension | StructureTower>;
+			const spawnsExtensions = energyStructures.filter((s) => s.structureType === STRUCTURE_SPAWN || s.structureType === STRUCTURE_EXTENSION);
+
+			let dest: null | StructureSpawn | StructureExtension | StructureTower | StructureStorage = null;
+			if (spawnsExtensions.length !== 0) {
+				dest = creep.pos.findClosestByPath(spawnsExtensions);
+			} else {
+				dest = creep.pos.findClosestByPath(energyStructures);
+			}
+
+			if ((!dest) && creep.room.storage) {
+				dest = creep.room.storage;
+			}
+
 			if (dest) {
 				const err = creep.transfer(dest, RESOURCE_ENERGY);
 				if (err === ERR_NOT_IN_RANGE) {
