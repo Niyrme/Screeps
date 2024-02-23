@@ -1,5 +1,15 @@
 import "./prototype.ts";
 
-export function roomHandler(room: Room) {
+export class RoomHandler {
+	protected memory: RoomMemory;
 
+	constructor(protected room: Room) {
+		this.memory = room.memory;
+	}
+
+	public execute() {
+	}
+
+	private construction() {
+	}
 }

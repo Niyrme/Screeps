@@ -1,9 +1,9 @@
-import { Logging } from "Util";
+import { Logging } from "Utils";
 
 declare global {
 	export namespace StructureSpawn {
 		export type SpawnCreepReturnType =
-			OK
+			| OK
 			| ERR_NOT_OWNER
 			| ERR_NAME_EXISTS
 			| ERR_BUSY

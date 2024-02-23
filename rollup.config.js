@@ -5,6 +5,7 @@ import swc from "@rollup/plugin-swc";
 import fs from "node:fs";
 import path from "node:path";
 import clear from "rollup-plugin-clear";
+import copy from "rollup-plugin-copy";
 import screepsDeploy from "./rollup/rollup-plugin-screeps-deploy.js";
 import screeps from "./rollup/rollup-plugin-screeps.js";
 
@@ -14,7 +15,8 @@ if (dest && (!(cfg = require("./screeps.json")[dest]))) {
 	throw new Error("A");
 }
 
-const modules = fs.readdirSync("src", { recursive: false }).filter(name => fs.statSync(path.join("src", name)).isDirectory());
+const modules = fs.readdirSync("src", { recursive: false })
+	.filter(name => name !== "WASM" && fs.statSync(path.join("src", name)).isDirectory());
 
 /** @type {import("rollup").RollupOptions} */
 const options = {
@@ -42,6 +44,11 @@ const options = {
 		clear({
 			targets: ["dist"],
 		}),
+		copy({
+			targets: [
+				{ src: "src/WASM/**/*.wasm", dest: "dist" },
+			],
+		}),
 		nodeResolve(),
 		swc({
 			swc: {
@@ -51,7 +58,7 @@ const options = {
 						tsx: false,
 						dynamicImport: true,
 					},
-					target: "es2017",
+					target: "es2018",
 				},
 			},
 		}),

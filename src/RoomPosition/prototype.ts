@@ -1,4 +1,4 @@
-import { CodeToString, Logging } from "Util";
+import { CodeToString, Logging } from "Utils";
 
 declare global {
 	export namespace RoomPosition {
@@ -12,11 +12,57 @@ declare global {
 	}
 
 	interface RoomPosition {
-		tryCreateConstructionSite(type: STRUCTURE_SPAWN, spawnName: string): RoomPosition.TryCreateConstructionSiteReturnCode;
+		findFarthestByRange<F extends FindConstant, S extends FindTypes[F]>(
+			type: F,
+			opts?: FilterOptions<F, S>,
+		): null | S;
+		findFarthestByRange<S extends AnyStructure>(
+			type: FIND_STRUCTURES | FIND_MY_STRUCTURES | FIND_HOSTILE_STRUCTURES,
+			opts?: FilterOptions<FIND_STRUCTURES, S>,
+		): null | S;
+		findFarthestByRange<P extends _HasRoomPosition | RoomPosition>(
+			objects: Array<P>,
+			opts?: { filter: any | string },
+		): null | P;
 
+		tryCreateConstructionSite(type: STRUCTURE_SPAWN, spawnName: string): RoomPosition.TryCreateConstructionSiteReturnCode;
 		tryCreateConstructionSite(type: Exclude<BuildableStructureConstant, STRUCTURE_SPAWN>, spawnName?: never): RoomPosition.TryCreateConstructionSiteReturnCode;
 	}
 }
+
+RoomPosition.prototype.findFarthestByRange = function <F extends FindConstant, S extends FindTypes[F]>(
+	type: F | Array<_HasRoomPosition | RoomPosition>,
+	opts: FilterOptions<F, S> | { filter: any | string },
+): null | S | (_HasRoomPosition | RoomPosition) {
+	const room = Game.rooms[this.roomName];
+	opts = _.clone(opts || {});
+
+	let objects: Array<S | _HasRoomPosition | RoomPosition> = [];
+	if (_.isNumber(type)) {
+		objects = room.find(type, opts);
+	} else if (_.isArray(type)) {
+		objects = opts.filter ? _.filter(type, opts.filter) : type;
+	}
+
+	switch (objects.length) {
+		case 0:
+			return null;
+		case 1:
+			return objects[0];
+		default: {
+			let maxRange = -Infinity;
+			let object: S | _HasRoomPosition | RoomPosition;
+			objects.forEach(obj => {
+				const range = this.getRangeTo(obj);
+				if (range > maxRange) {
+					maxRange = range;
+					object = obj;
+				}
+			});
+			return object!;
+		}
+	}
+};
 
 RoomPosition.prototype.tryCreateConstructionSite = function (type, spawnName = undefined) {
 	let occupied = this.lookFor(LOOK_CONSTRUCTION_SITES).length !== 0;

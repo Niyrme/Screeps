@@ -1,29 +1,10 @@
 declare global {
-	export namespace RoomMemory {
-		export namespace Resources {
-			export interface Energy {
-				miner: null | Id<Creep>;
-			}
-
-			export interface Mineral {
-			}
-		}
-
-		export interface Resources {
-			readonly energy: Record<Id<Source>, Resources.Energy>;
-			readonly minerals: Record<Id<Mineral>, Resources.Mineral>;
-		}
-
-		export type Job = Array<Actions.CreepAction>
-	}
-
 	interface RoomMemory {
-		resources: RoomMemory.Resources;
-		jobs: Array<RoomMemory.Job>;
+		lastRCL: number;
 	}
 
 	interface Room {
-		populateMemoryResources(): void;
+		getResources(): RoomResources.Resources;
 	}
 }
 
@@ -35,26 +16,37 @@ Room.prototype.toString = function () {
 	}
 };
 
-Room.prototype.populateMemoryResources = function () {
-	const resources: RoomMemory.Resources = {
-		energy: {},
-		minerals: {},
-	};
+namespace RoomResources {
+	interface Energy {}
 
-	this.find(FIND_SOURCES).forEach(source => {
-		if (source.id in this.memory.resources.energy) {
-			resources.energy[source.id] = this.memory.resources.energy[source.id];
-		} else {
-			resources.energy[source.id] = {
-				miner: null,
-			};
+	interface Minerals {}
+
+	export interface Resources {
+		energy: Map<Id<Source>, Energy>;
+		minerals: Map<Id<Mineral>, Minerals>;
+	}
+}
+
+const RoomResources: Map<Room["name"], RoomResources.Resources> = new Map();
+
+Room.prototype.getResources = function () {
+	if (!RoomResources.has(this.name)) {
+		const resources: RoomResources.Resources = {
+			energy: new Map(),
+			minerals: new Map(),
+		};
+
+		for (const source of this.find(FIND_SOURCES)) {
+			resources.energy.set(source.id, {});
 		}
-	});
-	this.find(FIND_MINERALS).forEach(mineral => {
-		resources.minerals[mineral.id] = {};
-	});
+		for (const mineral of this.find(FIND_MINERALS)) {
+			resources.minerals.set(mineral.id, {});
+		}
 
-	this.memory.resources = resources;
+		RoomResources.set(this.name, resources);
+	}
+
+	return RoomResources.get(this.name)!;
 };
 
 export {};

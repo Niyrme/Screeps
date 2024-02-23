@@ -1,60 +1,51 @@
 import "./prototype.ts";
-import { CodeToString, Logging, UnreachableError } from "Util";
-import { actionBuild, actionGather } from "./Action/_index.ts";
+import "./Actions/_index.ts";
+import { UnreachableError } from "Utils";
+import {
+	type CreepRole,
+	RoleAttack,
+	RoleBuild,
+	RoleClaim,
+	RoleExplore,
+	RoleHaul,
+	RoleHeal,
+	RoleMine,
+	RoleRepair,
+	RoleReserve,
+	RoleUpgrade,
+} from "./Roles/_index.ts";
+
+export interface ActionCreepMemory extends CreepMemory {
+	_actionSteps: Array<unknown>;
+}
+
+export interface ActionCreep extends Creep {
+	memory: ActionCreepMemory;
+}
+
+const roles: { [_ in string]: CreepRole } = {
+	[RoleAttack.RoleName]: RoleAttack,
+	[RoleBuild.RoleName]: RoleBuild,
+	[RoleClaim.RoleName]: RoleClaim,
+	[RoleExplore.RoleName]: RoleExplore,
+	[RoleHaul.RoleName]: RoleHaul,
+	[RoleHeal.RoleName]: RoleHeal,
+	[RoleMine.RoleName]: RoleMine,
+	[RoleRepair.RoleName]: RoleRepair,
+	[RoleReserve.RoleName]: RoleReserve,
+	[RoleUpgrade.RoleName]: RoleUpgrade,
+};
 
 export function creepHandler(creep: Creep) {
-	if (!("actions" in creep.memory)) {
-		// @ts-ignore
-		creep.memory.actions = [];
-	}
+	if (!((creep as ActionCreep).memory._actionSteps?.length !== 0)) {
+		const { role } = creep.decodeName();
 
-	if (creep.memory.actions.length === 0) {
-		if (Game.rooms[creep.memory.home].memory.jobs.length !== 0) {
-			creep.memory.actions = Game.rooms[creep.memory.home].memory.jobs.shift()!;
+		if (role in roles) {
+			(creep as ActionCreep).memory._actionSteps = roles[role].getActions(creep);
 		} else {
-			return;
+			throw new UnreachableError(`${creep}.role = ${role}`);
 		}
 	}
 
-	const [{ type: actionType }] = creep.memory.actions;
-	let err: ScreepsReturnCode;
-	switch (actionType) {
-		case "build": {
-			switch ((err = actionBuild(creep))) {
-				case OK:
-				case ERR_BUSY:
-					break;
-				case ERR_NOT_FOUND:
-					creep.memory.actions.shift();
-					break;
-				case ERR_NOT_ENOUGH_RESOURCES:
-					// TODO get new energy
-					creep.memory.actions.unshift();
-					break;
-				case ERR_NOT_IN_RANGE:
-					const site = Game.getObjectById((creep.memory.actions[0] as Actions.Build).constructionSite)!;
-					creep.travelTo(site, { range: 3 });
-					break;
-				default:
-					Logging.warning(`${creep} had unhandled error in action ${actionType}: ${CodeToString(err)}`);
-					break;
-			}
-			break;
-		}
-		case "gather": {
-			switch ((err = actionGather(creep))) {
-				default:
-					Logging.warning(`${creep} had unhandled error in action ${actionType}: ${CodeToString(err)}`);
-					break;
-			}
-			break;
-		}
-		case "harvest":
-		case "move":
-		case "repair":
-		case "transfer":
-		case "upgrade":
-		default:
-			throw new UnreachableError(`${creep} has invalid action: ${actionType}`);
-	}
+
 }

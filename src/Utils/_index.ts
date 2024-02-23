@@ -1,5 +1,7 @@
 export * from "./Errors.ts";
 export * from "./Logging.ts";
+export * from "./PriorityQueue.ts";
+export * from "./WASM.ts";
 
 namespace mergeWeak {
 	export type Object = Record<keyof any, unknown>

@@ -4,8 +4,8 @@ import "Lib";
 import "StructureSpawn";
 import "RoomPosition";
 import { creepHandler } from "Creep";
-import { roomHandler } from "Room";
-import { mergeWeak } from "Util";
+import { RoomHandler } from "Room";
+import { mergeWeak } from "Utils";
 
 (function initialMemorySetup() {
 	mergeWeak(
@@ -14,6 +14,8 @@ import { mergeWeak } from "Util";
 		{
 			debug: false,
 			creepID: 0,
+			colonyID: 0,
+			roleMap: {},
 		} as CustomMemory,
 	);
 })();
@@ -25,6 +27,6 @@ export function loop(): void {
 		}
 	}
 
-	_.forEach(Game.rooms, roomHandler);
+	_.forEach(Game.rooms, room => (new RoomHandler(room)).execute());
 	_.forEach(Game.creeps, creepHandler);
 }

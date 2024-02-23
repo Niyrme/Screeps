@@ -3,14 +3,14 @@ declare global {
 }
 
 declare global {
-	interface CustomMemory {
+	interface Memory {
+		readonly roleMap: Record<number, string>;
 		debug: boolean;
 		creepID: number;
-		jobID: number;
+		colonyID: number;
 	}
 
-	interface Memory extends CustomMemory {
-	}
+	type CustomMemory = Omit<Memory, "creeps" | "flags" | "powerCreeps" | "rooms" | "spawns">
 
 	type BaseCreep = Creep
 }

@@ -6,8 +6,8 @@ export const Logging = (() => {
 
 	function log(level: string, ...values: Array<unknown>) {
 		let s = "";
-		if (level in logColors) {
-			s += `<span style="color: ${logColors[level]}">[${level}]</span>`;
+		if (logColors.has(level)) {
+			s += `<span style="color: ${logColors.get(level)!}">[${level}]</span>`;
 		}
 		console.log(s, ...values);
 	}
@@ -30,9 +30,9 @@ export const Logging = (() => {
 	};
 })();
 
-export const logColors: Record<string, string> = {
-	[Logging.LOG_LEVEL_DEBUG]: "white",
-	[Logging.LOG_LEVEL_INFO]: "lightblue",
-	[Logging.LOG_LEVEL_WARNING]: "orange",
-	[Logging.LOG_LEVEL_ERROR]: "red",
-};
+export const logColors = new Map([
+	[Logging.LOG_LEVEL_DEBUG, "white"],
+	[Logging.LOG_LEVEL_INFO, "lightblue"],
+	[Logging.LOG_LEVEL_WARNING, "orange"],
+	[Logging.LOG_LEVEL_ERROR, "red"],
+]);
