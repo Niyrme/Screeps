@@ -1,0 +1,132 @@
+import { BaseRole } from "./_base.ts";
+import { registerRole } from "./_util.ts";
+import type { RoleMine } from "./Mine.ts";
+
+
+declare global {
+	interface AllRoles {
+		[RoleHarvest.NAME]: typeof RoleHarvest;
+	}
+}
+
+namespace RoleHarvest {
+	export interface Memory {
+		source: null | Id<Source>;
+		harvest: boolean;
+	}
+
+	export type Creep = BaseCreep<Memory>
+}
+
+export class RoleHarvest extends BaseRole {
+	public static readonly NAME: "harvest" = "harvest";
+
+	spawn(spawn: StructureSpawn, bootstrap: boolean = false): StructureSpawn.SpawnCreepReturnType {
+		const baseBody: Array<BodyPartConstant> = [WORK, CARRY, MOVE];
+		const size = Math.clamp(Math.floor(
+			(
+				bootstrap
+					? spawn.room.energyAvailable
+					: spawn.room.energyCapacityAvailable
+			) / Creep.getBodyCost(baseBody),
+		), 1, 5);
+
+		const body = _.flatten(_.fill(new Array(size), baseBody));
+
+		return spawn.newCreep(
+			body,
+			{
+				memory: {
+					home: spawn.room.name,
+					recycleSelf: false,
+					harvest: true,
+					source: null,
+				} as RoleHarvest.Creep["memory"],
+			},
+			{ role: "harvest" },
+		);
+	}
+
+	execute(creep: RoleHarvest.Creep): ScreepsReturnCode {
+		if (creep.memory.harvest && creep.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
+			creep.memory.harvest = false;
+		} else if ((!creep.memory.harvest) && creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
+			creep.memory.harvest = true;
+		}
+
+		if (creep.memory.harvest) {
+			let source: Source;
+			if (creep.memory.source) {
+				source = Game.getObjectById(creep.memory.source)!;
+			} else {
+				const sources = creep.room.find(FIND_SOURCES, {
+					filter: source => !_.find(
+						Game.creeps,
+						c => c.decodeName().role === "mine" && (c as RoleMine.Creep).memory.source === source.id,
+					),
+				});
+
+				if (sources.length === 0) {
+					creep.memory.recycleSelf = true;
+					return ERR_NOT_FOUND;
+				} else if (sources.length === 1) {
+					[source] = sources;
+				} else {
+					const active = sources.filter(s => s.energy !== 0);
+					source = creep.pos.findClosestByPath(active.length !== 0 ? active : sources, {
+						ignoreCreeps: true,
+					})!;
+				}
+
+				creep.memory.source = source.id;
+			}
+
+			const err = creep.harvest(source);
+			if (err === ERR_NOT_IN_RANGE) {
+				creep.travelTo(source);
+				return creep.harvest(source);
+			}
+			return err;
+		} else {
+			type EnergyStructure = StructureSpawn | StructureExtension | StructureTower
+			const structures: Array<EnergyStructure> = creep.room.find(FIND_MY_STRUCTURES, {
+				filter(s) {
+					switch (s.structureType) {
+						case STRUCTURE_SPAWN:
+						case STRUCTURE_EXTENSION:
+						case STRUCTURE_TOWER:
+							return s.store.getFreeCapacity(RESOURCE_ENERGY) !== 0;
+						default:
+							return false;
+					}
+				},
+			});
+
+			const notTowers = structures.filter(s => s.structureType !== STRUCTURE_TOWER) as Array<Exclude<EnergyStructure, StructureTower>>;
+
+			let dest: null | EnergyStructure | StructureStorage = creep.pos.findClosestByPath(
+				notTowers.length !== 0
+					? notTowers
+					: structures,
+				{ ignoreCreeps: true },
+			);
+
+			if ((!dest) && creep.room.storage) {
+				dest = creep.room.storage;
+			}
+
+			if (dest) {
+				const err = creep.transfer(dest, RESOURCE_ENERGY);
+				if (err === ERR_NOT_IN_RANGE) {
+					creep.travelTo(dest);
+					return creep.transfer(dest, RESOURCE_ENERGY);
+				}
+				return err;
+			} else {
+				return ERR_NOT_FOUND;
+			}
+		}
+	}
+}
+
+registerRole(RoleHarvest.NAME);

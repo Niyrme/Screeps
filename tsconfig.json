@@ -10,9 +10,34 @@
 		"noUnusedLocals": true,
 		"noEmit": true,
 		"esModuleInterop": true,
+		"resolveJsonModule": true,
 		"paths": {
-			"*": [
-				"src/*/_index.ts"
+			"Creep": [
+				"src/Creep/_index.ts"
+			],
+			"EventBus": [
+				"src/EventBus/_index.ts"
+			],
+			"Lib": [
+				"src/Lib/_index.ts"
+			],
+			"Prototype": [
+				"src/Prototype/_index.ts"
+			],
+			"Room": [
+				"src/Room/_index.ts"
+			],
+			"RoomPosition": [
+				"src/RoomPosition/_index.ts"
+			],
+			"StructureSpawn": [
+				"src/StructureSpawn/_index.ts"
+			],
+			"Templates": [
+				"src/Templates/_index.ts"
+			],
+			"Utils": [
+				"src/Utils/_index.ts"
 			]
 		}
 	},

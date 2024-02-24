@@ -10,11 +10,15 @@ declare global {
 
 declare global {
 	interface Memory {
-		creepID: number;
+		readonly roleMap: Record<number, keyof AllRoles>;
 		debug: boolean;
 	}
 
-	type CustomMemory = Omit<Memory, "creeps"|"flags"|"powerCreeps"|"rooms"|"spawns">
+	type CustomMemory = Omit<Memory, "creeps" | "flags" | "powerCreeps" | "rooms" | "spawns">
+
+	interface BaseCreep<M extends Record<any, any> = {}> extends Creep {
+		memory: CreepMemory & M;
+	}
 }
 
 export {};

@@ -1,3 +1,4 @@
+import { EVENT_CREEP_SPAWNED } from "Creep";
 import { Logging } from "Utils";
 
 declare global {
@@ -13,14 +14,16 @@ declare global {
 	}
 
 	interface StructureSpawn {
-		newCreep(body: Array<BodyPartConstant>, opts: PartialRequired<SpawnOptions, "memory">): StructureSpawn.SpawnCreepReturnType;
+		newCreep(
+			body: Array<BodyPartConstant>,
+			opts: PartialRequired<SpawnOptions, "memory">,
+			encodeMemory: Omit<CreepName, "spawnTime">,
+		): StructureSpawn.SpawnCreepReturnType;
 	}
 }
 
-StructureSpawn.prototype.newCreep = function (body, opts) {
-	const timeStamp = Game.time.toString(36);
-	const creepID = Memory.creepID.toString(36);
-	const name = `${timeStamp}/${creepID}`;
+StructureSpawn.prototype.newCreep = function (body, opts, encodeMemory) {
+	const name = Creep.encodeName({ ...encodeMemory, spawnTime: Game.time });
 
 	const err = this.spawnCreep(body, name, {
 		directions: [TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT, LEFT, TOP_LEFT],
@@ -28,8 +31,11 @@ StructureSpawn.prototype.newCreep = function (body, opts) {
 	}) as StructureSpawn.SpawnCreepReturnType;
 
 	if (err === OK) {
+		global.EventBus.trigger(EVENT_CREEP_SPAWNED, {
+			name,
+			spawn: this.id,
+		} as IEventBus.Creep.Spawned.EventBody);
 		Logging.info(`new Creep ${name}`);
-		Memory.creepID++;
 	}
 
 	return err;

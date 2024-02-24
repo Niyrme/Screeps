@@ -5,7 +5,8 @@ declare global {
 				export type EventName = "room-attacked"
 
 				export interface EventBody {
-					creep: Id<Creep>;
+					readonly room: Room["name"];
+					readonly creep: Id<Creep>;
 				}
 			}
 
@@ -13,19 +14,20 @@ declare global {
 				export type EventName = "room-rcl-change"
 
 				export interface EventBody {
-					old: number;
-					new: number;
+					readonly room: Room["name"];
+					readonly old: number;
+					readonly new: number;
 				}
 			}
 		}
 	}
 
 	interface IEventBus {
-		subscribe(name: IEventBus.Room.Attacked.EventName, callback: (room: Room["name"], eventBody: IEventBus.Room.Attacked.EventBody) => void): void;
-		subscribe(name: IEventBus.Room.RCLChange.EventName, callback: (room: Room["name"], eventBody: IEventBus.Room.RCLChange.EventBody) => void): void;
+		subscribe(name: IEventBus.Room.Attacked.EventName, callback: (eventBody: IEventBus.Room.Attacked.EventBody) => void): void;
+		subscribe(name: IEventBus.Room.RCLChange.EventName, callback: (eventBody: IEventBus.Room.RCLChange.EventBody) => void): void;
 
-		trigger(name: IEventBus.Room.Attacked.EventName, room: Room["name"], eventBody: IEventBus.Room.Attacked.EventBody): void;
-		trigger(name: IEventBus.Room.RCLChange.EventName, room: Room["name"], eventBody: IEventBus.Room.RCLChange.EventBody): void;
+		trigger(name: IEventBus.Room.Attacked.EventName, eventBody: IEventBus.Room.Attacked.EventBody): void;
+		trigger(name: IEventBus.Room.RCLChange.EventName, eventBody: IEventBus.Room.RCLChange.EventBody): void;
 	}
 }
 

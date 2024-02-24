@@ -1,5 +1,6 @@
 "use strict";
 
+import json from "@rollup/plugin-json";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import swc from "@rollup/plugin-swc";
 import fs from "node:fs";
@@ -42,6 +43,11 @@ const options = {
 	plugins: [
 		clear({
 			targets: ["dist"],
+		}),
+		json({
+			preferConst: true,
+			compact: true,
+			namedExports: false,
 		}),
 		nodeResolve(),
 		swc({
