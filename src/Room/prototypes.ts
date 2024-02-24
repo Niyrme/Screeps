@@ -20,6 +20,8 @@ declare global {
 
 	interface Room {
 		scanResources(): RoomMemory.Resources;
+
+		getConstructionSites(): Array<ConstructionSite>;
 	}
 }
 
@@ -49,6 +51,30 @@ Room.prototype.scanResources = function () {
 
 		return resources;
 	}
+};
+
+
+interface CachedConstructionSite {
+	lastUpdated: typeof Game.time;
+	sites: Array<Id<ConstructionSite>>;
+}
+
+const roomConstructionSitesCache = new Map<Room["name"], CachedConstructionSite>();
+
+Room.prototype.getConstructionSites = function () {
+	if (roomConstructionSitesCache.has(this.name)) {
+		const { lastUpdated, sites } = roomConstructionSitesCache.get(this.name)!;
+		if (lastUpdated === Game.time) {
+			return sites.map(Game.getObjectById) as Array<ConstructionSite>;
+		}
+	}
+
+	const sites = this.find(FIND_MY_CONSTRUCTION_SITES);
+	roomConstructionSitesCache.set(this.name, {
+		lastUpdated: Game.time,
+		sites: sites.map(site => site.id),
+	});
+	return sites;
 };
 
 export {};

@@ -19,6 +19,12 @@ declare global {
 			opts: PartialRequired<SpawnOptions, "memory">,
 			encodeMemory: Omit<CreepName, "spawnTime">,
 		): StructureSpawn.SpawnCreepReturnType;
+
+		newGenericCreep(
+			base: Array<BodyPartConstant>,
+			opts: PartialRequired<SpawnOptions, "memory">,
+			encodeMemory: Omit<CreepName, "spawnTime">,
+		): StructureSpawn.SpawnCreepReturnType;
 	}
 }
 
@@ -39,6 +45,16 @@ StructureSpawn.prototype.newCreep = function (body, opts, encodeMemory) {
 	}
 
 	return err;
+};
+
+StructureSpawn.prototype.newGenericCreep = function (base, opts, encodeMemory) {
+	const size = Math.clamp(
+		Math.floor(this.room.energyCapacityAvailable / Creep.getBodyCost(base)),
+		1,
+		this.room.controller!.level + 1,
+	);
+
+	return this.newCreep(_.flatten(_.fill(new Array(size), base)), opts, encodeMemory);
 };
 
 export {};

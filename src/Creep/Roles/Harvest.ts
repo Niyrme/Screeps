@@ -23,18 +23,20 @@ export class RoleHarvest extends BaseRole {
 
 	spawn(spawn: StructureSpawn, bootstrap: boolean = false): StructureSpawn.SpawnCreepReturnType {
 		const baseBody: Array<BodyPartConstant> = [WORK, CARRY, MOVE];
-		const size = Math.clamp(Math.floor(
-			(
-				bootstrap
-					? spawn.room.energyAvailable
-					: spawn.room.energyCapacityAvailable
-			) / Creep.getBodyCost(baseBody),
-		), 1, 5);
-
-		const body = _.flatten(_.fill(new Array(size), baseBody));
+		const size = Math.clamp(
+			Math.floor(
+				(
+					bootstrap
+						? spawn.room.energyAvailable
+						: spawn.room.energyCapacityAvailable
+				) / Creep.getBodyCost(baseBody),
+			),
+			1,
+			spawn.room.controller!.level + 1,
+		);
 
 		return spawn.newCreep(
-			body,
+			_.flatten(_.fill(new Array(size), baseBody)),
 			{
 				memory: {
 					home: spawn.room.name,
