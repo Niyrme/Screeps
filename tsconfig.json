@@ -18,8 +18,8 @@
 			"EventBus": [
 				"src/EventBus/_index.ts"
 			],
-			"Game": [
-				"src/Game/_index.ts"
+			"Global": [
+				"src/Global/_index.ts"
 			],
 			"Lib": [
 				"src/Lib/_index.ts"

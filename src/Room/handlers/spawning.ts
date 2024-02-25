@@ -74,16 +74,17 @@ export function roomHandlerSpawning(room: Room) {
 
 	if (spawns.length === 0) { return; }
 
-	const repairers = creeps.filter(c => c.decodeName().role === RoleRepair.NAME) as Array<RoleRepair.Creep>;
 	if (room.find(FIND_MY_STRUCTURES, { filter: s => s.structureType === STRUCTURE_TOWER }).length !== 0) {
+		const repairers = creeps.filter(c => c.decodeName().role === RoleRepair.NAME) as Array<RoleRepair.Creep>;
 		if (repairers.length < 1) {
 			handleSpawnError(RoleRepair.spawn(spawns[0]));
 		}
 	} else {
 		const damagedStructures = room.find(FIND_STRUCTURES, {
-			filter: s => (("my" in s) ? s.my : true),
+			filter: s => (("my" in s) ? s.my : true) && s.hits < s.hitsMax,
 		});
 		if (damagedStructures.length !== 0) {
+			const repairers = creeps.filter(c => c.decodeName().role === RoleRepair.NAME) as Array<RoleRepair.Creep>;
 			for (
 				let i = repairers.length;
 				i < Math.clamp(Math.floor(Math.sqrt(damagedStructures.length)), 0, 3);
@@ -94,6 +95,8 @@ export function roomHandlerSpawning(room: Room) {
 			}
 		}
 	}
+
+	if (spawns.length === 0) { return; }
 
 	const constructionSites = room.getConstructionSites();
 	if (constructionSites.length !== 0) {

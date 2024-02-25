@@ -2,7 +2,7 @@ import "Prototype";
 import "EventBus";
 import "Lib";
 
-import "Game";
+import "Global";
 import "Creep";
 import "Room";
 import "RoomPosition";

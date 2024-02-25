@@ -41,7 +41,7 @@ export class RoleMine extends BaseRole {
 		switch (memory.minerRole) {
 			case "drop": {
 				body = [MOVE, WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE];
-				while (Creep.getBodyCost(body)) { body.pop(); }
+				while (Creep.getBodyCost(body) > spawn.room.energyCapacityAvailable) { body.pop(); }
 				if (body.length < 2) { return ERR_NOT_ENOUGH_RESOURCES; }
 				break;
 			}
@@ -57,6 +57,7 @@ export class RoleMine extends BaseRole {
 			body,
 			{
 				memory: {
+					home: spawn.room.name,
 					recycleSelf: false,
 					atSource: false,
 					...memory,

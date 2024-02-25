@@ -1,9 +1,9 @@
 declare global {
-	interface Game {
+	interface Global {
 		getId<T extends _HasId>(object: T): T["id"];
 	}
 }
 
-Game.getId = ({ id }) => id;
+global.getId = ({ id }) => id;
 
 export {};

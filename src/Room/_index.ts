@@ -5,6 +5,7 @@ import {
 	roomHandlerEvents,
 	roomHandlerSpawning,
 	roomHandlerTowers,
+	roomHandlerVisuals,
 } from "./handlers/_index.ts";
 
 export * from "./events.ts";
@@ -17,6 +18,7 @@ export function roomManager(room: Room) {
 	roomHandlerEvents(room);
 	roomHandlerTowers(room);
 	roomHandlerSpawning(room);
+	room.memory.visuals && roomHandlerVisuals(room);
 }
 
 export namespace roomManager {

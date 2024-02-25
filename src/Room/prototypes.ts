@@ -16,6 +16,7 @@ declare global {
 		resources: RoomMemory.Resources;
 		RCL: number;
 		attackTargets: Array<Id<Creep>>;
+		visuals: boolean;
 	}
 
 	namespace Room {
@@ -80,7 +81,7 @@ interface CachedRoomResources<R extends ResourceConstant = ResourceConstant> ext
 	dropped: Map<R, Array<Id<Resource<R>>>>;
 	tombstones: Array<Id<Tombstone>>;
 	ruins: Array<Id<Ruin>>;
-	structures: Array<Id<AnyStoreStructure>>;
+	structures: Array<Id<Exclude<AnyStoreStructure, StructureSpawn | StructureExtension>>>;
 }
 
 const roomResourcesCache = new Map<Room["name"], CachedRoomResources>();
@@ -134,8 +135,8 @@ Room.prototype.getResources = function <R extends ResourceConstant = ResourceCon
 	const tombstones = this.find(FIND_TOMBSTONES);
 	const ruins = this.find(FIND_RUINS);
 	const structures = this.find(FIND_STRUCTURES, {
-		filter: s => "store" in s,
-	}) as Array<AnyStoreStructure>;
+		filter: s => ("store" in s) && !(s.structureType === STRUCTURE_SPAWN || s.structureType === STRUCTURE_EXTENSION),
+	}) as Array<Exclude<AnyStoreStructure, StructureSpawn | StructureExtension>>;
 
 	const dropped: CachedRoomResources["dropped"] = new Map();
 	droppedResources.forEach(r => {
@@ -149,9 +150,9 @@ Room.prototype.getResources = function <R extends ResourceConstant = ResourceCon
 	roomResourcesCache.set(this.name, {
 		lastUpdated: Game.time,
 		dropped,
-		tombstones: tombstones.map(Game.getId),
-		ruins: ruins.map(Game.getId),
-		structures: structures.map(Game.getId),
+		tombstones: tombstones.map(global.getId),
+		ruins: ruins.map(global.getId),
+		structures: structures.map(global.getId),
 	});
 
 	return filterResources(roomResourcesCache.get(this.name)!)!;
@@ -181,7 +182,7 @@ Room.prototype.getConstructionSites = function () {
 	const sites = this.find(FIND_MY_CONSTRUCTION_SITES);
 	roomConstructionSitesCache.set(this.name, {
 		lastUpdated: Game.time,
-		sites: sites.map(Game.getId),
+		sites: sites.map(global.getId),
 	});
 	return sites;
 };
@@ -215,9 +216,9 @@ Room.prototype.getDamagedStructures = function (
 
 	roomDamagedStructuresCache.set(this.name, {
 		lastUpdated: Game.time,
-		walls: walls.map(Game.getId),
-		ramparts: ramparts.map(Game.getId),
-		rest: rest.map(Game.getId),
+		walls: walls.map(global.getId),
+		ramparts: ramparts.map(global.getId),
+		rest: rest.map(global.getId),
 	});
 
 	return {

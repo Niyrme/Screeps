@@ -1,4 +1,4 @@
-import { EVENT_ROOM_ATTACKED, EVENT_ROOM_RCL_CHANGE } from "Room";
+import { EVENT_ROOM_ATTACKED, EVENT_ROOM_RCL_CHANGE } from "../events.ts";
 
 export function roomHandlerEvents(room: Room) {
 	if (room.controller?.my) {
