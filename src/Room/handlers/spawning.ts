@@ -29,7 +29,7 @@ export function roomHandlerSpawning(room: Room) {
 		return err;
 	}
 
-	let minerCount = 0;
+	const minerCount = creeps.filter(c => c.decodeName().role === RoleMine.NAME).length;
 	for (const sourceID of Object.keys(room.memory.resources.energy)) {
 		if (spawns.length === 0) { return; }
 
@@ -38,7 +38,6 @@ export function roomHandlerSpawning(room: Room) {
 		const miner = _.find(creeps, creep => {
 			switch (creep.decodeName().role) {
 				case RoleMine.NAME:
-					minerCount++;
 					return (creep as RoleMine.Creep).memory.source === source.id;
 				default:
 					return false;

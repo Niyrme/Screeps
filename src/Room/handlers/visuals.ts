@@ -11,7 +11,7 @@ export function roomHandlerVisuals(room: Room) {
 	for (const spawn of room.find(FIND_MY_SPAWNS)) {
 		if (spawn.spawning) {
 			room.visual.text(
-				`${(((spawn.spawning.remainingTime + 1) / spawn.spawning.needTime) * 100).toFixed(1)}%`,
+				`${((1 - ((spawn.spawning.remainingTime + 1) / spawn.spawning.needTime)) * 100).toFixed(1)}%`,
 				spawn.pos.x,
 				spawn.pos.y - 1,
 				{ align: "center" },
