@@ -18,10 +18,29 @@ declare global {
 		attackTargets: Array<Id<Creep>>;
 	}
 
+	namespace Room {
+		export type RoomResource<R extends ResourceConstant> = Tombstone | Ruin | AnyStoreStructure | Resource<R>
+	}
+
 	interface Room {
 		scanResources(): RoomMemory.Resources;
 
+		getResources<R extends ResourceConstant = ResourceConstant>(resource?: R): Array<Room.RoomResource<R>>;
+
 		getConstructionSites(): Array<ConstructionSite>;
+		getDamagedStructures<
+			Walls extends boolean = boolean,
+			Ramparts extends boolean = boolean,
+			Rest extends boolean = boolean,
+		>(filter?: {
+			walls?: Walls,
+			ramparts?: Ramparts,
+			rest?: Rest,
+		}): {
+			walls: Walls extends true ? Array<StructureWall> : null,
+			ramparts: Ramparts extends true ? Array<StructureRampart> : null,
+			rest: Rest extends true ? Array<Exclude<AnyStructure, StructureRampart | StructureWall>> : null,
+		};
 	}
 }
 
@@ -53,13 +72,103 @@ Room.prototype.scanResources = function () {
 	}
 };
 
+interface CachedRoomValue {
+	readonly lastUpdated: typeof Game.time;
+}
 
-interface CachedConstructionSite {
-	lastUpdated: typeof Game.time;
+interface CachedRoomResources<R extends ResourceConstant = ResourceConstant> extends CachedRoomValue {
+	dropped: Map<R, Array<Id<Resource<R>>>>;
+	tombstones: Array<Id<Tombstone>>;
+	ruins: Array<Id<Ruin>>;
+	structures: Array<Id<AnyStoreStructure>>;
+}
+
+const roomResourcesCache = new Map<Room["name"], CachedRoomResources>();
+
+Room.prototype.getResources = function <R extends ResourceConstant = ResourceConstant>(resource: undefined | R = undefined) {
+	function filterResources(
+		{
+			lastUpdated,
+			dropped,
+			tombstones,
+			ruins,
+			structures,
+		}: CachedRoomResources,
+	): null | Array<Room.RoomResource<R>> {
+		if (lastUpdated === Game.time) {
+			const resources: Array<Room.RoomResource<R>> = [];
+
+			if (resource) {
+				if (dropped.has(resource)) {
+					resources.push(
+						...(dropped.get(resource)!.map(Game.getObjectById) as Array<Resource<R>>),
+					);
+				}
+			} else {
+				dropped.forEach(ids => resources.concat(ids.map(Game.getObjectById) as Array<Resource<R>>));
+			}
+
+			resources.push(
+				...(tombstones.map(Game.getObjectById) as Array<Tombstone>)
+					.filter(t => t.store.getUsedCapacity(resource) !== 0),
+				...(ruins.map(Game.getObjectById) as Array<Ruin>)
+					.filter(r => r.store.getUsedCapacity(resource) !== 0),
+				...(structures.map(Game.getObjectById) as Array<AnyStoreStructure>)
+					.filter(s => s.store.getUsedCapacity(resource) !== 0),
+			);
+
+			return resources;
+		} else {
+			return null;
+		}
+	}
+
+	if (roomResourcesCache.has(this.name)) {
+		const resources = filterResources(roomResourcesCache.get(this.name)!);
+		if (resources !== null) {
+			return resources;
+		}
+	}
+
+	const droppedResources = this.find(FIND_DROPPED_RESOURCES);
+	const tombstones = this.find(FIND_TOMBSTONES);
+	const ruins = this.find(FIND_RUINS);
+	const structures = this.find(FIND_STRUCTURES, {
+		filter: s => "store" in s,
+	}) as Array<AnyStoreStructure>;
+
+	const dropped: CachedRoomResources["dropped"] = new Map();
+	droppedResources.forEach(r => {
+		if (!dropped.has(r.resourceType)) {
+			dropped.set(r.resourceType, []);
+		}
+
+		dropped.get(r.resourceType)!.push(r.id);
+	});
+
+	roomResourcesCache.set(this.name, {
+		lastUpdated: Game.time,
+		dropped,
+		tombstones: tombstones.map(Game.getId),
+		ruins: ruins.map(Game.getId),
+		structures: structures.map(Game.getId),
+	});
+
+	return filterResources(roomResourcesCache.get(this.name)!)!;
+};
+
+interface CachedConstructionSite extends CachedRoomValue {
 	sites: Array<Id<ConstructionSite>>;
 }
 
+interface CachedDamagedStructures extends CachedRoomValue {
+	walls: Array<Id<StructureWall>>;
+	ramparts: Array<Id<StructureRampart>>;
+	rest: Array<Id<Exclude<AnyStructure, StructureWall | StructureRampart>>>;
+}
+
 const roomConstructionSitesCache = new Map<Room["name"], CachedConstructionSite>();
+const roomDamagedStructuresCache = new Map<Room["name"], CachedDamagedStructures>();
 
 Room.prototype.getConstructionSites = function () {
 	if (roomConstructionSitesCache.has(this.name)) {
@@ -72,9 +181,50 @@ Room.prototype.getConstructionSites = function () {
 	const sites = this.find(FIND_MY_CONSTRUCTION_SITES);
 	roomConstructionSitesCache.set(this.name, {
 		lastUpdated: Game.time,
-		sites: sites.map(site => site.id),
+		sites: sites.map(Game.getId),
 	});
 	return sites;
+};
+
+// @ts-expect-error
+Room.prototype.getDamagedStructures = function (
+	{
+		walls: takeWalls = true,
+		ramparts: takeRamparts = true,
+		rest: takeRest = true,
+	} = {},
+) {
+	if (roomDamagedStructuresCache.has(this.name)) {
+		const { lastUpdated, walls, rest, ramparts } = roomDamagedStructuresCache.get(this.name)!;
+
+		if (lastUpdated === Game.time) {
+			return {
+				walls: takeWalls ? walls.map(Game.getObjectById) : null,
+				ramparts: takeRamparts ? ramparts.map(Game.getObjectById) : null,
+				rest: takeRest ? rest.map(Game.getObjectById) : null,
+			};
+		}
+	}
+
+	const damaged = this.find(FIND_STRUCTURES, {
+		filter: s => s.hits < s.hitsMax,
+	});
+	const walls = damaged.filter(s => s.structureType === STRUCTURE_WALL) as Array<StructureWall>;
+	const ramparts = damaged.filter(s => s.structureType === STRUCTURE_RAMPART) as Array<StructureRampart>;
+	const rest = damaged.filter(s => s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART) as Array<Exclude<AnyStructure, StructureWall | StructureRampart>>;
+
+	roomDamagedStructuresCache.set(this.name, {
+		lastUpdated: Game.time,
+		walls: walls.map(Game.getId),
+		ramparts: ramparts.map(Game.getId),
+		rest: rest.map(Game.getId),
+	});
+
+	return {
+		walls: takeWalls ? walls : null,
+		ramparts: takeRamparts ? ramparts : null,
+		rest: takeRest ? rest : null,
+	};
 };
 
 export {};

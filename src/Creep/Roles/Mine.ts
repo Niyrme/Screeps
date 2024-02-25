@@ -32,10 +32,11 @@ export namespace RoleMine {
 	export type Creep = BaseCreep<Memory>
 }
 
+// @ts-expect-error
 export class RoleMine extends BaseRole {
 	public static readonly NAME: "mine" = "mine";
 
-	spawn(spawn: StructureSpawn, memory: Omit<RoleMine.Memory, "atSource">): StructureSpawn.SpawnCreepReturnType {
+	public static spawn(spawn: StructureSpawn, memory: Omit<RoleMine.Memory, "atSource">): StructureSpawn.SpawnCreepReturnType {
 		let body: Array<BodyPartConstant>;
 		switch (memory.minerRole) {
 			case "drop": {
@@ -62,12 +63,12 @@ export class RoleMine extends BaseRole {
 				} as RoleMine.Creep["memory"],
 			},
 			{
-				role: "mine",
+				role: RoleMine.NAME,
 			},
 		);
 	}
 
-	execute(creep: RoleMine.Creep): ScreepsReturnCode {
+	public static execute(creep: RoleMine.Creep): ScreepsReturnCode {
 		const source = Game.getObjectById(creep.memory.source)!;
 
 		if (!creep.memory.atSource) {
@@ -99,6 +100,11 @@ export class RoleMine extends BaseRole {
 					// @ts-expect-error
 					throw new UnreachableError(`${creep}.memory.mineRole = ${creep.memory.minerRole}`);
 			}
+		}
+
+		if (creep.memory.minerRole === "link" && creep.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
+			const link = Game.getObjectById(creep.memory.link)!;
+			creep.transfer(link, RESOURCE_ENERGY);
 		}
 
 		return creep.harvest(source);

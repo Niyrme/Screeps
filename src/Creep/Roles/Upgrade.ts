@@ -1,4 +1,3 @@
-import { NotImplementedError } from "Utils";
 import { BaseRole } from "./_base.ts";
 import { registerRole } from "./_util.ts";
 
@@ -11,6 +10,7 @@ declare global {
 namespace RoleUpgrade {
 	export interface Memory {
 		readonly controller: Id<StructureController>;
+		gather: boolean;
 	}
 
 	export type Creep = BaseCreep<Memory>
@@ -19,12 +19,40 @@ namespace RoleUpgrade {
 export class RoleUpgrade extends BaseRole {
 	public static readonly NAME: "upgrade" = "upgrade";
 
-	spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType {
-		throw new NotImplementedError(`${this}.spawn`);
+	public static spawn(spawn: StructureSpawn, controller?: StructureController): StructureSpawn.SpawnCreepReturnType {
+		return spawn.newGenericCreep(
+			[WORK, CARRY, MOVE],
+			{
+				memory: {
+					home: spawn.room.name,
+					recycleSelf: false,
+					gather: true,
+					controller: controller?.id || spawn.room.controller!.id,
+				} as RoleUpgrade.Creep["memory"],
+			},
+			{ role: RoleUpgrade.NAME },
+		);
 	}
 
-	execute(creep: RoleUpgrade.Creep): ScreepsReturnCode {
-		throw new NotImplementedError(`${this}.execute(${creep})`);
+	public static execute(creep: RoleUpgrade.Creep): ScreepsReturnCode {
+		if (creep.memory.gather && creep.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
+			creep.memory.gather = false;
+		} else if ((!creep.memory.gather) && creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
+			creep.memory.gather = true;
+		}
+
+		if (creep.memory.gather) {
+			return RoleUpgrade.gather(creep);
+		} else {
+			const controller = Game.getObjectById(creep.memory.controller)!;
+
+			const err = creep.upgradeController(controller);
+			if (err === ERR_NOT_IN_RANGE) {
+				creep.travelTo(controller);
+				return creep.upgradeController(controller);
+			}
+			return err;
+		}
 	}
 }
 

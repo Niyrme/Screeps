@@ -18,11 +18,11 @@ namespace RoleClaim {
 export class RoleClaim extends BaseRole {
 	public static readonly NAME: "claim" = "claim";
 
-	spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType {
+	public static spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType {
 		throw new NotImplementedError(`${this}.spawn`);
 	}
 
-	execute(creep: RoleClaim.Creep): ScreepsReturnCode {
+	public static execute(creep: RoleClaim.Creep): ScreepsReturnCode {
 		throw new NotImplementedError(`${this}.execute(${creep})`);
 	}
 }

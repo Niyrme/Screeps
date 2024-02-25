@@ -11,8 +11,8 @@ export abstract class BaseRole {
 		throw new NotImplementedError(`${this}.execute(${creep})`);
 	}
 
-	public static gather(creep: Creep, resource: ResourceConstant = RESOURCE_ENERGY): ScreepsReturnCode {
-		if (creep.room.storage && creep.room.storage.store.getUsedCapacity(resource) !== 0) {
+	protected static gather(creep: Creep, resource: ResourceConstant = RESOURCE_ENERGY, fromStorage: boolean = true): ScreepsReturnCode {
+		if (fromStorage && creep.room.storage && creep.room.storage.store.getUsedCapacity(resource) !== 0) {
 			const err = creep.withdraw(creep.room.storage, resource);
 			if (err === ERR_NOT_IN_RANGE) {
 				creep.travelTo(creep.room.storage);

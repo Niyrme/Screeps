@@ -18,11 +18,11 @@ namespace RoleHeal {
 export class RoleHeal extends BaseRole {
 	public static readonly NAME: "heal" = "heal";
 
-	spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType {
+	public static spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType {
 		throw new NotImplementedError(`${this}.spawn`);
 	}
 
-	execute(creep: RoleHeal.Creep): ScreepsReturnCode {
+	public static execute(creep: RoleHeal.Creep): ScreepsReturnCode {
 		throw new NotImplementedError(`${this}.execute(${creep})`);
 	}
 }

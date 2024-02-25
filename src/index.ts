@@ -2,12 +2,17 @@ import "Prototype";
 import "EventBus";
 import "Lib";
 
+import "Game";
 import "Creep";
 import "Room";
 import "RoomPosition";
 import "StructureSpawn";
 import { creepManager, EVENT_CREEP_DIED } from "Creep";
 import { roomManager } from "Room";
+
+(function init() {
+	_.forEach(Game.rooms, roomManager.placeConstructionSites);
+})();
 
 export function loop(): void {
 	for (const name in Memory.creeps) {

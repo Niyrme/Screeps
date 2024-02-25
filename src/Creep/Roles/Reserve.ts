@@ -18,11 +18,11 @@ namespace RoleReserve {
 export class RoleReserve extends BaseRole {
 	public static readonly NAME: "reserve" = "reserve";
 
-	spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType {
+	public static spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType {
 		throw new NotImplementedError(`${this}.spawn`);
 	}
 
-	execute(creep: RoleReserve.Creep): ScreepsReturnCode {
+	public static execute(creep: RoleReserve.Creep): ScreepsReturnCode {
 		throw new NotImplementedError(`${this}.execute(${creep})`);
 	}
 }

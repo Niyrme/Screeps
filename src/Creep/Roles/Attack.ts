@@ -18,11 +18,11 @@ namespace RoleAttack {
 export class RoleAttack extends BaseRole {
 	public static readonly NAME: "attack" = "attack";
 
-	spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType {
+	public static spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType {
 		throw new NotImplementedError(`${this}.spawn`);
 	}
 
-	execute(creep: RoleAttack.Creep): ScreepsReturnCode {
+	public static execute(creep: RoleAttack.Creep): ScreepsReturnCode {
 		throw new NotImplementedError(`${this}.execute(${creep})`);
 	}
 }

@@ -19,24 +19,24 @@ namespace RoleBuild {
 export class RoleBuild extends BaseRole {
 	public static readonly NAME: "build" = "build";
 
-	spawn(spawn: StructureSpawn, constructionSite: null | Id<ConstructionSite> = null): StructureSpawn.SpawnCreepReturnType {
+	public static spawn(spawn: StructureSpawn, constructionSite: null | Id<ConstructionSite> = null): StructureSpawn.SpawnCreepReturnType {
 		return spawn.newGenericCreep(
 			[WORK, CARRY, MOVE],
 			{
 				memory: {
 					home: spawn.room.name,
 					recycleSelf: false,
-					gather: false,
+					gather: true,
 					site: constructionSite,
 				} as RoleBuild.Creep["memory"],
 			},
 			{
-				role: "build",
+				role: RoleBuild.NAME,
 			},
 		);
 	}
 
-	execute(creep: RoleBuild.Creep): ScreepsReturnCode {
+	public static execute(creep: RoleBuild.Creep): ScreepsReturnCode {
 		if (creep.memory.gather && creep.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
 			creep.memory.gather = false;
 		} else if ((!creep.memory.gather) && creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {

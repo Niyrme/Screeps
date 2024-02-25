@@ -1,7 +1,6 @@
+import type { RoleMine } from "Creep";
 import { BaseRole } from "./_base.ts";
 import { registerRole } from "./_util.ts";
-import type { RoleMine } from "./Mine.ts";
-
 
 declare global {
 	interface AllRoles {
@@ -21,7 +20,7 @@ namespace RoleHarvest {
 export class RoleHarvest extends BaseRole {
 	public static readonly NAME: "harvest" = "harvest";
 
-	spawn(spawn: StructureSpawn, bootstrap: boolean = false): StructureSpawn.SpawnCreepReturnType {
+	public static spawn(spawn: StructureSpawn, bootstrap: boolean = false): StructureSpawn.SpawnCreepReturnType {
 		const baseBody: Array<BodyPartConstant> = [WORK, CARRY, MOVE];
 		const size = Math.clamp(
 			Math.floor(
@@ -45,11 +44,11 @@ export class RoleHarvest extends BaseRole {
 					source: null,
 				} as RoleHarvest.Creep["memory"],
 			},
-			{ role: "harvest" },
+			{ role: RoleHarvest.NAME },
 		);
 	}
 
-	execute(creep: RoleHarvest.Creep): ScreepsReturnCode {
+	public static execute(creep: RoleHarvest.Creep): ScreepsReturnCode {
 		if (creep.memory.harvest && creep.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
 			creep.memory.harvest = false;
 		} else if ((!creep.memory.harvest) && creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
@@ -106,7 +105,7 @@ export class RoleHarvest extends BaseRole {
 
 			const notTowers = structures.filter(s => s.structureType !== STRUCTURE_TOWER) as Array<Exclude<EnergyStructure, StructureTower>>;
 
-			let dest: null | EnergyStructure | StructureStorage = creep.pos.findClosestByPath(
+			let dest: null | EnergyStructure | StructureStorage | StructureContainer = creep.pos.findClosestByPath(
 				notTowers.length !== 0
 					? notTowers
 					: structures,
@@ -115,6 +114,18 @@ export class RoleHarvest extends BaseRole {
 
 			if ((!dest) && creep.room.storage) {
 				dest = creep.room.storage;
+			}
+
+			if (!dest) {
+				const flag = Game.flags[creep.room.name] || Game.flags[creep.memory.home];
+				if (flag) {
+					const [container] = flag.pos.lookFor(LOOK_STRUCTURES)
+						.filter(s => s.structureType === STRUCTURE_CONTAINER) as Array<StructureContainer>;
+
+					if (container) {
+						dest = container;
+					}
+				}
 			}
 
 			if (dest) {

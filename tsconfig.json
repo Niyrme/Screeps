@@ -18,6 +18,9 @@
 			"EventBus": [
 				"src/EventBus/_index.ts"
 			],
+			"Game": [
+				"src/Game/_index.ts"
+			],
 			"Lib": [
 				"src/Lib/_index.ts"
 			],

@@ -18,11 +18,11 @@ namespace RoleExplore {
 export class RoleExplore extends BaseRole {
 	public static readonly NAME: "explore" = "explore";
 
-	spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType {
+	public static spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType {
 		throw new NotImplementedError(`${this}.spawn`);
 	}
 
-	execute(creep: RoleExplore.Creep): ScreepsReturnCode {
+	public static execute(creep: RoleExplore.Creep): ScreepsReturnCode {
 		throw new NotImplementedError(`${this}.execute(${creep})`);
 	}
 }
