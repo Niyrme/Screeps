@@ -8,7 +8,7 @@ declare global {
 	}
 }
 
-namespace RoleHeal {
+export namespace RoleHeal {
 	export interface Memory {
 	}
 

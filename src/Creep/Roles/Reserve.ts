@@ -8,7 +8,7 @@ declare global {
 	}
 }
 
-namespace RoleReserve {
+export namespace RoleReserve {
 	export interface Memory {
 	}
 

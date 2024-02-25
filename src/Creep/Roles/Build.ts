@@ -7,7 +7,7 @@ declare global {
 	}
 }
 
-namespace RoleBuild {
+export namespace RoleBuild {
 	export interface Memory {
 		gather: boolean;
 		site: null | Id<ConstructionSite>;

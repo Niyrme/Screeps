@@ -8,7 +8,7 @@ declare global {
 	}
 }
 
-namespace RoleHarvest {
+export namespace RoleHarvest {
 	export interface Memory {
 		source: null | Id<Source>;
 		harvest: boolean;

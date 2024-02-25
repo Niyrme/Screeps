@@ -7,7 +7,7 @@ declare global {
 	}
 }
 
-namespace RoleRepair {
+export namespace RoleRepair {
 	export interface Memory {
 		gather: boolean;
 		structure: null | Id<AnyStructure>;

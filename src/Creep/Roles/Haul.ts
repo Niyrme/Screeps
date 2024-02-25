@@ -8,7 +8,7 @@ declare global {
 	}
 }
 
-namespace RoleHaul {
+export namespace RoleHaul {
 	export interface Memory {
 		gather: boolean;
 	}

@@ -1,4 +1,4 @@
-import { RoleHarvest, RoleMine } from "Creep";
+import { RoleBuild, RoleHarvest, RoleHaul, RoleMine, RoleRepair, RoleUpgrade } from "Creep";
 
 export function roomHandlerSpawning(room: Room) {
 	if (!room.controller?.my) { return; }
@@ -57,6 +57,55 @@ export function roomHandlerSpawning(room: Room) {
 				}),
 				true,
 			);
+		}
+	}
+
+	const haulers = creeps.filter(c => c.decodeName().role === RoleHaul.NAME) as Array<RoleHaul.Creep>;
+	for (let i = haulers.length; i < minerCount; i++) {
+		if (spawns.length === 0) { return; }
+		handleSpawnError(RoleHaul.spawn(spawns[0], haulers.length === 0), haulers.length === 0);
+	}
+
+	const upgraders = creeps.filter(c => c.decodeName().role === RoleUpgrade.NAME) as Array<RoleUpgrade.Creep>;
+	for (let i = upgraders.length; i < Math.clamp(9 - room.controller.level, 1, 3); i++) {
+		if (spawns.length === 0) { return; }
+		handleSpawnError(RoleUpgrade.spawn(spawns[0], room.controller));
+	}
+
+	if (spawns.length === 0) { return; }
+
+	const repairers = creeps.filter(c => c.decodeName().role === RoleRepair.NAME) as Array<RoleRepair.Creep>;
+	if (room.find(FIND_MY_STRUCTURES, { filter: s => s.structureType === STRUCTURE_TOWER }).length !== 0) {
+		if (repairers.length < 1) {
+			handleSpawnError(RoleRepair.spawn(spawns[0]));
+		}
+	} else {
+		const damagedStructures = room.find(FIND_STRUCTURES, {
+			filter: s => (("my" in s) ? s.my : true),
+		});
+		if (damagedStructures.length !== 0) {
+			for (
+				let i = repairers.length;
+				i < Math.clamp(Math.floor(Math.sqrt(damagedStructures.length)), 0, 3);
+				i++
+			) {
+				if (spawns.length === 0) { return; }
+				handleSpawnError(RoleRepair.spawn(spawns[0]));
+			}
+		}
+	}
+
+	const constructionSites = room.getConstructionSites();
+	if (constructionSites.length !== 0) {
+		const builders = creeps.filter(c => c.decodeName().role === RoleBuild.NAME) as Array<RoleBuild.Creep>;
+		const constructionCost = constructionSites.reduce((cost, site) => cost + site.progressTotal - site.progress, 0);
+		for (
+			let i = builders.length;
+			i < Math.clamp(Math.floor(Math.sqrt(constructionCost / 1000)), 1, 3);
+			i++
+		) {
+			if (spawns.length === 0) { return; }
+			handleSpawnError(RoleBuild.spawn(spawns[0]));
 		}
 	}
 }

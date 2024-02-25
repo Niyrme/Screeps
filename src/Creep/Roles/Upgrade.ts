@@ -7,7 +7,7 @@ declare global {
 	}
 }
 
-namespace RoleUpgrade {
+export namespace RoleUpgrade {
 	export interface Memory {
 		readonly controller: Id<StructureController>;
 		gather: boolean;

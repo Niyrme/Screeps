@@ -8,7 +8,7 @@ declare global {
 	}
 }
 
-namespace RoleClaim {
+export namespace RoleClaim {
 	export interface Memory {
 	}
 
