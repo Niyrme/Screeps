@@ -81,7 +81,7 @@ interface CachedRoomResources<R extends ResourceConstant = ResourceConstant> ext
 	dropped: Map<R, Array<Id<Resource<R>>>>;
 	tombstones: Array<Id<Tombstone>>;
 	ruins: Array<Id<Ruin>>;
-	structures: Array<Id<Exclude<AnyStoreStructure, StructureSpawn | StructureExtension>>>;
+	structures: Array<Id<Exclude<AnyStoreStructure, StructureSpawn | StructureExtension | StructureTower>>>;
 }
 
 const roomResourcesCache = new Map<Room["name"], CachedRoomResources>();
@@ -124,6 +124,8 @@ Room.prototype.getResources = function <R extends ResourceConstant = ResourceCon
 		}
 	}
 
+	const flag = Game.flags[this.name];
+
 	if (roomResourcesCache.has(this.name)) {
 		const resources = filterResources(roomResourcesCache.get(this.name)!);
 		if (resources !== null) {
@@ -135,8 +137,13 @@ Room.prototype.getResources = function <R extends ResourceConstant = ResourceCon
 	const tombstones = this.find(FIND_TOMBSTONES);
 	const ruins = this.find(FIND_RUINS);
 	const structures = this.find(FIND_STRUCTURES, {
-		filter: s => ("store" in s) && !(s.structureType === STRUCTURE_SPAWN || s.structureType === STRUCTURE_EXTENSION),
-	}) as Array<Exclude<AnyStoreStructure, StructureSpawn | StructureExtension>>;
+		filter: s => ("store" in s) && !(
+			s.structureType === STRUCTURE_SPAWN
+			|| s.structureType === STRUCTURE_EXTENSION
+			|| s.structureType === STRUCTURE_TOWER
+			|| (s.structureType === STRUCTURE_LINK && !flag.pos.isNearTo(s))
+		),
+	}) as Array<Exclude<AnyStoreStructure, StructureSpawn | StructureExtension | StructureTower>>;
 
 	const dropped: CachedRoomResources["dropped"] = new Map();
 	droppedResources.forEach(r => {

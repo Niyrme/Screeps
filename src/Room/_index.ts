@@ -3,6 +3,7 @@ import { EVENT_ROOM_ATTACKED, EVENT_ROOM_RCL_CHANGE } from "./events.ts";
 import {
 	roomHandlerConstruction,
 	roomHandlerEvents,
+	roomHandlerLinks,
 	roomHandlerSpawning,
 	roomHandlerTowers,
 	roomHandlerVisuals,
@@ -19,6 +20,7 @@ export function roomManager(room: Room) {
 	roomHandlerTowers(room);
 	roomHandlerSpawning(room);
 	room.memory.visuals && roomHandlerVisuals(room);
+	roomHandlerLinks(room);
 }
 
 export namespace roomManager {

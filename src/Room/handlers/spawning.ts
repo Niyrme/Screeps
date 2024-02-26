@@ -45,14 +45,16 @@ export function roomHandlerSpawning(room: Room) {
 		});
 
 		if (!miner) {
-			const hasLink = source.pos.findInRange(FIND_MY_STRUCTURES, 2, {
+			const [link] = source.pos.findInRange(FIND_MY_STRUCTURES, 2, {
 				filter: s => s.structureType === STRUCTURE_LINK,
-			}).length !== 0;
+			}) as Array<StructureLink>;
 
 			handleSpawnError(
 				RoleMine.spawn(spawns[0], {
 					source: source.id,
-					minerRole: hasLink ? "link" : "drop",
+					minerRole: (!!link) ? "link" : "drop",
+					// @ts-ignore
+					link: link ? link.id : undefined,
 				}),
 				true,
 			);

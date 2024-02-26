@@ -69,7 +69,10 @@ function towersRepair(room: Room): boolean {
 	}
 
 	if (target) {
-		getTowers(room).forEach(tower => tower.repair(target!));
+		getTowers(room).forEach(tower => {
+			return (tower.store.getUsedCapacity(RESOURCE_ENERGY) / tower.store.getCapacity(RESOURCE_ENERGY)) > 0.8
+				&& tower.repair(target!);
+		});
 		return true;
 	} else {
 		return false;

@@ -30,7 +30,7 @@ Creep.prototype.toString = function () {
 };
 
 Creep.prototype.decodeName = function () {
-	const [, time, roleID] = /^([a-z0-9]+)\/([a-z0-9]+)/.exec(this.name)!;
+	const [, time, roleID] = /^([a-z0-9]+)[\/|]([a-z0-9]+)/.exec(this.name)!;
 
 	return {
 		spawnTime: parseInt(time, 36),
