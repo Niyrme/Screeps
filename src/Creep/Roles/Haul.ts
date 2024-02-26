@@ -51,7 +51,13 @@ export class RoleHaul extends BaseRole {
 		}
 
 		if (creep.memory.gather) {
-			const energy = creep.room.getResources(RESOURCE_ENERGY);
+			const energy = creep.room.getResources(RESOURCE_ENERGY).filter(e => {
+				if ("structureType" in e) {
+					return e.structureType !== STRUCTURE_STORAGE;
+				} else {
+					return true;
+				}
+			});
 			const link = _.find(
 				energy,
 				e => ("structureType" in e) && e.structureType === STRUCTURE_LINK,

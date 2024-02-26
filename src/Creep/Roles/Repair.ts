@@ -85,7 +85,7 @@ export class RoleRepair extends BaseRole {
 		const { walls, ramparts, rest } = creep.room.getDamagedStructures({
 			walls: true,
 			ramparts: true,
-			rest: hasTower,
+			rest: !hasTower,
 		}) as {
 			walls: Array<StructureWall>,
 			ramparts: Array<StructureRampart>,

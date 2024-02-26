@@ -48,7 +48,7 @@ export class RoleUpgrade extends BaseRole {
 
 			const err = creep.upgradeController(controller);
 			if (err === ERR_NOT_IN_RANGE) {
-				creep.travelTo(controller);
+				creep.travelTo(controller, { range: 3 });
 				return creep.upgradeController(controller);
 			}
 			return err;
