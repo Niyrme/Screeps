@@ -137,7 +137,7 @@ Room.prototype.getResources = function <R extends ResourceConstant = ResourceCon
 	const tombstones = this.find(FIND_TOMBSTONES);
 	const ruins = this.find(FIND_RUINS);
 	const structures = this.find(FIND_STRUCTURES, {
-		filter: s => ("store" in s) && !(
+		filter: s => ("store" in s) && s.store.getUsedCapacity() !== 0 && !(
 			s.structureType === STRUCTURE_SPAWN
 			|| s.structureType === STRUCTURE_EXTENSION
 			|| s.structureType === STRUCTURE_TOWER

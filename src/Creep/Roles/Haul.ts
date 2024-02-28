@@ -1,4 +1,4 @@
-import { NotImplementedError, UnreachableError } from "Utils";
+import { UnreachableError } from "Utils";
 import { BaseRole } from "./_base.ts";
 import { registerRole } from "./_util.ts";
 
@@ -51,18 +51,27 @@ export class RoleHaul extends BaseRole {
 		}
 
 		if (creep.memory.gather) {
-			const energy = creep.room.getResources(RESOURCE_ENERGY).filter(e => {
+			const resources = creep.room.getResources().filter(e => {
 				if ("structureType" in e) {
 					return e.structureType !== STRUCTURE_STORAGE;
 				} else {
 					return true;
 				}
 			});
+
+			if (resources.length === 0) {
+				if (creep.store.getUsedCapacity() !== 0) {
+					creep.memory.gather = false;
+				}
+				return ERR_NOT_FOUND;
+			}
+
 			const link = _.find(
-				energy,
+				resources,
 				e => ("structureType" in e) && e.structureType === STRUCTURE_LINK,
 			) as undefined | StructureLink;
-			if (link) {
+
+			if (link && link.store.getUsedCapacity(RESOURCE_ENERGY) !== 0) {
 				const err = creep.withdraw(link, RESOURCE_ENERGY);
 				if (err === ERR_NOT_IN_RANGE) {
 					creep.travelTo(link);
@@ -70,95 +79,34 @@ export class RoleHaul extends BaseRole {
 				}
 				return err;
 			}
-			if (energy.length !== 0) {
-				const enough = energy.filter(r => {
-					if ("store" in r) {
-						return r.store.getUsedCapacity(RESOURCE_ENERGY) >= creep.store.getFreeCapacity(RESOURCE_ENERGY);
-					} else if ("amount" in r) {
-						return r.amount >= creep.store.getFreeCapacity(RESOURCE_ENERGY);
-					} else {
-						throw new UnreachableError(`invalid resource RoleHaul.execute(${creep})`);
-					}
-				});
 
-				const target = creep.pos.findClosestByPath(
-					enough.length !== 0 ? enough : energy,
-					{ ignoreCreeps: true },
-				);
+			const target = creep.pos.findClosestByPath(resources, {
+				ignoreCreeps: true,
+				filter: s => ("structureType" in s) && s.structureType !== STRUCTURE_LINK,
+			});
 
-				if (target) {
-					let err: ScreepsReturnCode;
-					if ("store" in target) {
-						err = creep.withdraw(target, RESOURCE_ENERGY);
-						if (err === ERR_NOT_IN_RANGE) {
-							creep.travelTo(target);
-							return creep.withdraw(target, RESOURCE_ENERGY);
-						}
-					} else {
-						err = creep.pickup(target);
-						if (err === ERR_NOT_IN_RANGE) {
-							creep.travelTo(target);
-							return creep.pickup(target);
+			if (target) {
+				if ("store" in target) {
+					for (const resourceType of Object.keys(target.store) as Array<ResourceConstant>) {
+						if (target.store.getUsedCapacity(resourceType) !== 0) {
+							const err = creep.withdraw(target, RESOURCE_ENERGY);
+							if (err === ERR_NOT_IN_RANGE) {
+								creep.travelTo(target);
+								return creep.withdraw(target, RESOURCE_ENERGY);
+							}
+							return err;
 						}
 					}
-
+				} else if ("amount" in target) {
+					const err = creep.pickup(target);
+					if (err === ERR_NOT_IN_RANGE) {
+						creep.travelTo(target);
+						return creep.pickup(target);
+					}
 					return err;
+				} else {
+					throw new UnreachableError(`invalid resource RoleHaul.execute(${creep})`);
 				}
-			}
-
-			const resoucres = creep.room.getResources();
-			if (resoucres.length !== 0) {
-				const enough = resoucres.filter(r => {
-					if ("store" in r) {
-						for (const type of Object.keys(r.store) as Array<ResourceConstant>) {
-							if ((r.store.getUsedCapacity(type) || -1) >= creep.store.getFreeCapacity(type)) {
-								return true;
-							}
-						}
-						return false;
-					} else if ("amount" in r) {
-						return r.amount >= creep.store.getFreeCapacity();
-					} else {
-						throw new UnreachableError(`invalid resource RoleHaul.execute(${creep})`);
-					}
-				});
-
-				const isCheckEnough = enough.length !== 0;
-				const target = creep.pos.findClosestByPath(
-					isCheckEnough ? enough : resoucres,
-					{ ignoreCreeps: true },
-				);
-
-				if (target) {
-					if ("store" in target) {
-						for (const resourceType of Object.keys(target.store) as Array<ResourceConstant>) {
-							const stored = target.store.getUsedCapacity(resourceType);
-							if (stored && (
-								isCheckEnough
-									? stored >= creep.store.getFreeCapacity(resourceType)
-									: stored !== 0
-							)) {
-								const err = creep.withdraw(target, resourceType);
-								if (err === ERR_NOT_IN_RANGE) {
-									creep.travelTo(target);
-									return creep.withdraw(target, resourceType);
-								}
-								return err;
-							}
-						}
-					} else {
-						const err = creep.pickup(target);
-						if (err === ERR_NOT_IN_RANGE) {
-							creep.travelTo(target);
-							return creep.pickup(target);
-						}
-						return err;
-					}
-				}
-			}
-
-			if (creep.store.getUsedCapacity() !== 0) {
-				creep.memory.gather = false;
 			}
 
 			return ERR_NOT_FOUND;
@@ -232,10 +180,6 @@ export class RoleHaul extends BaseRole {
 
 			return ERR_NOT_FOUND;
 		}
-	}
-
-	protected static findResource(creep: Creep): ScreepsReturnCode {
-		throw new NotImplementedError(`${this}.gatherEnergy(${creep})`);
 	}
 }
 
