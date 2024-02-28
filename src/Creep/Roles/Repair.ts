@@ -106,23 +106,13 @@ export class RoleRepair extends BaseRole {
 			return creep.pos.findClosestByPath(rest);
 		}
 
-		if (ramparts.length !== 0) {
-			const rs = ramparts.filter(rampart => rampart.hits < 300000 && ((rampart.hits / rampart.hitsMax) < 0.3));
-			if (rs.length !== 0) {
-				let rampart: undefined | StructureRampart = undefined;
-				for (let i = 0; i < 1; i += 0.0001) {
-					if ((rampart = _.find(rs, r => (r.hits / r.hitsMax) < i))) {
-						return rampart;
-					}
-				}
-			}
-		}
+		const rampartsWalls = ([] as Array<StructureRampart | StructureWall>).concat(ramparts, walls);
+		if (rampartsWalls.length !== 0) {
+			let structure: undefined | StructureRampart | StructureWall = undefined;
 
-		if (walls.length !== 0) {
-			let wall: undefined | StructureWall = undefined;
 			for (let i = 0; i < 1; i += 0.0001) {
-				if ((wall = _.find(walls, w => (w.hits / w.hitsMax) < i))) {
-					return wall;
+				if ((structure = _.find(rampartsWalls, r => (r.hits / r.hitsMax) < i))) {
+					return structure;
 				}
 			}
 		}
