@@ -31,8 +31,15 @@ global.EventBus.subscribe(EVENT_ROOM_ATTACKED, ({ room: roomName, creep: creepID
 	const room = Game.rooms[roomName];
 	if (!room.controller?.my) { return; }
 
+	const attacker = Game.getObjectById(creepID)!;
+	if (attacker.my) {
+		return;
+	} else if ("structureType" in attacker) {
+		return;
+	}
+
 	if (!_.contains(room.memory.attackTargets, creepID)) {
-		room.memory.attackTargets.push(creepID);
+		room.memory.attackTargets.push(creepID as Id<Exclude<typeof attacker, StructureTower>>);
 	}
 });
 

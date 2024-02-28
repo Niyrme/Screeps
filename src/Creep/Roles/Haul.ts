@@ -157,6 +157,10 @@ export class RoleHaul extends BaseRole {
 				}
 			}
 
+			if (creep.store.getUsedCapacity() !== 0) {
+				creep.memory.gather = false;
+			}
+
 			return ERR_NOT_FOUND;
 		} else {
 			if (creep.store.getUsedCapacity(RESOURCE_ENERGY) !== 0) {

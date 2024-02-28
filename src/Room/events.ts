@@ -6,7 +6,7 @@ declare global {
 
 				export interface EventBody {
 					readonly room: Room["name"];
-					readonly creep: Id<Creep>;
+					readonly creep: Id<Creep | PowerCreep | StructureTower>;
 				}
 			}
 

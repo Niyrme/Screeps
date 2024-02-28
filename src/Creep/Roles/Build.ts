@@ -43,6 +43,13 @@ export class RoleBuild extends BaseRole {
 			creep.memory.gather = true;
 		}
 
+		if (creep.memory.gather && creep.memory.site) {
+			const site = Game.getObjectById(creep.memory.site);
+			if (site && creep.store.getUsedCapacity(RESOURCE_ENERGY) >= (site.progressTotal - site.progress)) {
+				creep.memory.gather = false;
+			}
+		}
+
 		if (creep.memory.gather) {
 			return RoleBuild.gather(creep);
 		} else {

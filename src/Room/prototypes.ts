@@ -15,7 +15,7 @@ declare global {
 	interface RoomMemory {
 		resources: RoomMemory.Resources;
 		RCL: number;
-		attackTargets: Array<Id<Creep>>;
+		attackTargets: Array<Id<Creep | PowerCreep>>;
 		visuals: boolean;
 	}
 
