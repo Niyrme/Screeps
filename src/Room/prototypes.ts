@@ -106,7 +106,7 @@ Room.prototype.getResources = function <R extends ResourceConstant = ResourceCon
 					);
 				}
 			} else {
-				dropped.forEach(ids => resources.concat(ids.map(Game.getObjectById) as Array<Resource<R>>));
+				dropped.forEach(ids => resources.push(...ids.map(Game.getObjectById) as Array<Resource<R>>));
 			}
 
 			resources.push(

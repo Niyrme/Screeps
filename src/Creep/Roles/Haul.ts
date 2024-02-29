@@ -1,4 +1,4 @@
-import { UnreachableError } from "Utils";
+import { CodeToString, Logging, UnreachableError } from "Utils";
 import { BaseRole } from "./_base.ts";
 import { registerRole } from "./_util.ts";
 
@@ -51,7 +51,7 @@ export class RoleHaul extends BaseRole {
 		}
 
 		if (creep.memory.gather) {
-			const resources = creep.room.getResources().filter(e => {
+			let resources = creep.room.getResources().filter(e => {
 				if ("structureType" in e) {
 					return e.structureType !== STRUCTURE_STORAGE;
 				} else {
@@ -80,33 +80,55 @@ export class RoleHaul extends BaseRole {
 				return err;
 			}
 
-			const target = creep.pos.findClosestByPath(resources, {
-				ignoreCreeps: true,
-				filter: s => ("structureType" in s) && s.structureType !== STRUCTURE_LINK,
+			resources = resources.filter(r => ("structureType" in r) ? r.structureType !== STRUCTURE_LINK : true);
+
+			const notContainers = resources.filter(r => {
+				if ("structureType" in r) {
+					return r.structureType !== STRUCTURE_CONTAINER;
+				} else {
+					return true;
+				}
 			});
+
+			const target = creep.pos.findClosestByPath(
+				notContainers.length !== 0 ? notContainers : resources,
+				{
+					ignoreCreeps: true,
+					filter: s => ("structureType" in s) ? s.structureType !== STRUCTURE_LINK : true,
+				},
+			);
 
 			if (target) {
 				if ("store" in target) {
 					for (const resourceType of Object.keys(target.store) as Array<ResourceConstant>) {
 						if (target.store.getUsedCapacity(resourceType) !== 0) {
+							resourceType !== RESOURCE_ENERGY && Logging.debug(`STORE: ${target}`);
+							resourceType !== RESOURCE_ENERGY && Logging.debug(`resourceType: ${resourceType}`);
 							const err = creep.withdraw(target, RESOURCE_ENERGY);
 							if (err === ERR_NOT_IN_RANGE) {
 								creep.travelTo(target);
 								return creep.withdraw(target, RESOURCE_ENERGY);
+							} else {
+								resourceType !== RESOURCE_ENERGY && Logging.debug(`withdraw: ${CodeToString(err)}`);
 							}
 							return err;
 						}
 					}
 				} else if ("amount" in target) {
+					target.resourceType !== RESOURCE_ENERGY && Logging.debug(`DROPPED: ${target}`);
 					const err = creep.pickup(target);
 					if (err === ERR_NOT_IN_RANGE) {
 						creep.travelTo(target);
 						return creep.pickup(target);
+					} else {
+						target.resourceType !== RESOURCE_ENERGY && Logging.debug(`pickup: ${target}`);
 					}
 					return err;
 				} else {
 					throw new UnreachableError(`invalid resource RoleHaul.execute(${creep})`);
 				}
+			} else if (creep.store.getUsedCapacity() !== 0) {
+				creep.memory.gather = false;
 			}
 
 			return ERR_NOT_FOUND;
