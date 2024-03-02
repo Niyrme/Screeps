@@ -11,6 +11,23 @@ export abstract class BaseRole {
 		throw new NotImplementedError(`${this}.execute(${creep})`);
 	}
 
+	protected static renew(creep: Creep): ScreepsReturnCode {
+		const spawns = creep.room.getTickCache().freeSpawns
+			.map<null | StructureSpawn>(Game.getObjectById)
+			.filter((s): s is Exclude<typeof s, null> => !!s);
+
+		const spawn = creep.pos.findClosestByPath(spawns, {
+			filter: s => s.store.getUsedCapacity(RESOURCE_ENERGY) !== 0,
+		});
+
+		if (spawn) {
+			creep.travelTo(spawn);
+			return spawn.renewCreep(creep);
+		} else {
+			return ERR_NOT_FOUND;
+		}
+	}
+
 	protected static getBaseStorage(creep: Creep): null | StructureStorage | StructureContainer {
 		const { baseStorage } = creep.room.getTickCache();
 

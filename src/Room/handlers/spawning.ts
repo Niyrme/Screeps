@@ -38,7 +38,6 @@ export function roomHandlerSpawning(room: Room) {
 		}
 	}
 
-	const minerCount = creeps.filter(c => c.decodeName().role === RoleMine.NAME).length;
 	for (const sourceID of Object.keys(room.memory.resources.energy)) {
 		if (spawns.length === 0) { return; }
 
@@ -70,10 +69,10 @@ export function roomHandlerSpawning(room: Room) {
 		}
 	}
 
-	const haulers = creeps.filter((c): c is RoleHaul.Creep => c.decodeName().role === RoleHaul.NAME);
-	for (let i = haulers.length; i < minerCount; i++) {
+	const hasHauler = creeps.filter((c): c is RoleHaul.Creep => c.decodeName().role === RoleHaul.NAME).length !== 0;
+	if (!hasHauler) {
 		if (spawns.length === 0) { return; }
-		handleSpawnError(RoleHaul.spawn(spawns[0], haulers.length === 0), haulers.length === 0);
+		handleSpawnError(RoleHaul.spawn(spawns[0]), true);
 	}
 
 	const hasHandler = creeps.filter((c): c is RoleManage.Creep => c.decodeName().role === RoleManage.NAME).length !== 0;
@@ -83,7 +82,7 @@ export function roomHandlerSpawning(room: Room) {
 	}
 
 	const upgraders = creeps.filter((c): c is RoleUpgrade.Creep => c.decodeName().role === RoleUpgrade.NAME);
-	for (let i = upgraders.length; i < Math.clamp(9 - room.controller.level, 1, 3); i++) {
+	for (let i = upgraders.length; i < Math.clamp(9 - room.controller.level, 1, 2); i++) {
 		if (spawns.length === 0) { return; }
 		handleSpawnError(RoleUpgrade.spawn(spawns[0], room.controller));
 	}

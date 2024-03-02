@@ -74,19 +74,15 @@ interface RoomTickCache extends TickCache {
 	readonly resources: RoomTickCache.Resources;
 
 	readonly baseStorage: null | Id<StructureStorage | StructureContainer>;
+
+	readonly freeSpawns: Array<Id<StructureSpawn>>;
 }
 
 const tickCache = new Map<Room["name"], RoomTickCache>;
 
 function getCache(room: Room): RoomTickCache {
 	if (tickCache.get(room.name)?.lastUpdated !== Game.time) {
-		const constructionSites: RoomTickCache["constructionSites"] = room.find(FIND_MY_CONSTRUCTION_SITES)
-			.map(global.getId);
 		const roomStructures = room.find(FIND_STRUCTURES);
-
-		const damagedStructures: RoomTickCache["damagedStructures"] = roomStructures
-			.filter(s => s.hits < s.hitsMax && ("my" in s ? s.my : true))
-			.map(global.getId);
 
 		const resources: RoomTickCache["resources"] = {
 			dropped: room.find(FIND_DROPPED_RESOURCES)
@@ -116,23 +112,24 @@ function getCache(room: Room): RoomTickCache {
 				.map(getCache.mapStoreObject),
 		};
 
-		const baseFlag = Game.flags[room.name];
-
-		const baseStorage = room.storage?.id
-			|| (
-				_.find(roomStructures, s => {
-					return s.structureType === STRUCTURE_CONTAINER && s.pos.isNearTo(baseFlag);
-				}) as undefined | StructureContainer
-			)?.id
-			|| null;
-
 		tickCache.set(room.name, {
 			lastUpdated: Game.time,
-			constructionSites,
+			constructionSites: room.find(FIND_MY_CONSTRUCTION_SITES).map(global.getId),
 			structures: roomStructures.map(global.getId),
-			damagedStructures,
+			damagedStructures: roomStructures
+				.filter(s => s.hits < s.hitsMax && ("my" in s ? s.my : true))
+				.map(global.getId),
 			resources,
-			baseStorage,
+			baseStorage: room.storage?.id
+				|| (
+					_.find(roomStructures, s => {
+						return s.structureType === STRUCTURE_CONTAINER && s.pos.isNearTo(Game.flags[room.name]);
+					}) as undefined | StructureContainer
+				)?.id
+				|| null,
+			freeSpawns: roomStructures
+				.filter((s): s is Extract<typeof s, StructureSpawn> => s.structureType === STRUCTURE_SPAWN && !s.spawning)
+				.map(global.getId),
 		});
 	}
 

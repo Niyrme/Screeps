@@ -19,6 +19,7 @@ export namespace RoleManage {
 
 	export interface Memory {
 		fill: null | Memory.Fill;
+		renew: boolean;
 	}
 
 	export type Creep = BaseCreep<Memory>
@@ -50,6 +51,27 @@ export class RoleManage extends BaseRole {
 			return ERR_NOT_FOUND;
 		}
 
+		if ((creep.ticksToLive || Infinity) < 100 && !creep.memory.renew) {
+			creep.memory.renew = true;
+		} else if (creep.memory.renew && (creep.ticksToLive || -Infinity) >= CREEP_LIFE_TIME * 0.99) {
+			creep.memory.renew;
+		}
+
+		const hasHostiles = creep.room.find(FIND_HOSTILE_CREEPS).length !== 0;
+
+		if (creep.memory.renew && hasHostiles) {
+			creep.memory.renew = false;
+			creep.memory.fill = null;
+		}
+
+		if (creep.memory.renew) {
+			const err = this.renew(creep);
+			if (err !== ERR_NOT_FOUND) {
+				creep.memory.renew = false;
+				return err;
+			}
+		}
+
 		if (creep.memory.fill) {
 			let { id: structureId, resource, gathering } = creep.memory.fill;
 			if ((!gathering) && creep.store.getUsedCapacity(resource) === 0) {
@@ -74,18 +96,17 @@ export class RoleManage extends BaseRole {
 			}
 
 			const requiredResource = structure.store.getFreeCapacity(resource) || Infinity;
-			const gatherAmount = Math.min(
-				creep.store.getCapacity(resource),
-				requiredResource,
-			);
 
-			if (gathering && creep.store.getUsedCapacity(resource) >= gatherAmount) {
+			if (gathering && creep.store.getUsedCapacity(resource) >= requiredResource) {
 				creep.memory.fill.gathering = gathering = false;
 			}
 
 			if (gathering) {
 				creep.travelTo(storage);
-				return creep.withdraw(storage, resource);
+				return creep.withdraw(storage, resource, Math.min(
+					requiredResource,
+					creep.store.getCapacity(resource),
+				));
 			} else {
 				creep.travelTo(structure);
 				const err = creep.transfer(structure, resource);
@@ -107,6 +128,27 @@ export class RoleManage extends BaseRole {
 				.map<null | AnyStructure>(Game.getObjectById)
 				.filter((v): v is Exclude<typeof v, null> => !!v)
 				.filter((s): s is Extract<typeof s, AnyStoreStructure> => "store" in s);
+
+			if (hasHostiles) {
+				const towers = structures
+					.filter((s): s is Extract<typeof s, StructureTower> => s.structureType === STRUCTURE_TOWER)
+					.filter(s => s.store.getFreeCapacity(RESOURCE_ENERGY) !== 0);
+
+				if (towers.length !== 0) {
+					const target = creep.pos.findClosestByPath(towers, { ignoreCreeps: true });
+					if (
+						target
+						&& (storage.store.getUsedCapacity(RESOURCE_ENERGY) >= target.store.getFreeCapacity(RESOURCE_ENERGY))
+					) {
+						creep.memory.fill = {
+							id: target.id,
+							gathering: true,
+							resource: RESOURCE_ENERGY,
+						};
+						return OK;
+					}
+				}
+			}
 
 			const [link] = structures.filter((s): s is Extract<typeof s, StructureLink> => {
 				return s.structureType === STRUCTURE_LINK
