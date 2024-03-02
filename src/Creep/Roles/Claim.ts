@@ -10,6 +10,7 @@ declare global {
 
 export namespace RoleClaim {
 	export interface Memory {
+		readonly room: Room["name"];
 	}
 
 	export type Creep = BaseCreep<Memory>

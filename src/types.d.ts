@@ -7,6 +7,12 @@ declare global {
 }
 
 declare global {
+	interface TickCache {
+		readonly lastUpdated: typeof Game.time;
+	}
+}
+
+declare global {
 	interface Memory {
 		readonly roleMap: Record<number, keyof AllRoles>;
 		debug: boolean;

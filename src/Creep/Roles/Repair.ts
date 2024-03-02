@@ -20,6 +20,8 @@ export class RoleRepair extends BaseRole {
 	public static readonly NAME: "repair" = "repair";
 
 	public static spawn(spawn: StructureSpawn): StructureSpawn.SpawnCreepReturnType {
+		const [structure] = this.findRepairTargets(spawn.room);
+
 		return spawn.newGenericCreep(
 			[WORK, CARRY, MOVE],
 			{
@@ -27,7 +29,7 @@ export class RoleRepair extends BaseRole {
 					home: spawn.room.name,
 					recycleSelf: false,
 					gather: true,
-					structure: null,
+					structure: structure?.id || null,
 				} as RoleRepair.Creep["memory"],
 			},
 			{
@@ -44,32 +46,29 @@ export class RoleRepair extends BaseRole {
 		}
 
 		if (creep.memory.gather) {
-			return RoleRepair.gather(creep);
+			return this.gather(creep);
 		} else {
 			let structure: null | AnyStructure = null;
 
 			if (creep.memory.structure) {
 				structure = Game.getObjectById(creep.memory.structure);
 				if (
-					(structure && !(structure.hits < structure.hitsMax))
-					|| structure?.structureType === STRUCTURE_RAMPART
-					|| structure?.structureType === STRUCTURE_WALL
+					(!structure)
+					|| (!(structure.hits < structure.hitsMax))
+					|| structure.structureType === STRUCTURE_RAMPART
+					|| structure.structureType === STRUCTURE_WALL
 				) {
 					structure = null;
 					creep.memory.structure = null;
 				}
 			}
 
-			structure ||= RoleRepair.findRepairTarget(creep);
+			structure ||= creep.pos.findClosestByPath(RoleRepair.findRepairTargets(creep.room));
 			if (structure) {
 				creep.memory.structure = structure.id;
 
-				const err = creep.repair(structure);
-				if (err === ERR_NOT_IN_RANGE) {
-					creep.travelTo(structure, { range: 3 });
-					return creep.repair(structure);
-				}
-				return err;
+				creep.travelTo(structure, { range: 3 });
+				return creep.repair(structure);
 			} else {
 				creep.memory.recycleSelf = true;
 				return ERR_NOT_FOUND;
@@ -77,47 +76,43 @@ export class RoleRepair extends BaseRole {
 		}
 	}
 
-	private static findRepairTarget(creep: Creep): null | AnyStructure {
-		const hasTower = creep.room.find(FIND_MY_STRUCTURES, {
+	private static findRepairTargets(room: Room): Array<AnyStructure> {
+		const hasTower = room.find(FIND_MY_STRUCTURES, {
 			filter: s => s.structureType === STRUCTURE_TOWER,
 		}).length !== 0;
 
-		const { walls, ramparts, rest } = creep.room.getDamagedStructures({
-			walls: true,
-			ramparts: true,
-			rest: !hasTower,
-		}) as {
-			walls: Array<StructureWall>,
-			ramparts: Array<StructureRampart>,
-			rest: null | Array<Exclude<AnyStructure, StructureRampart | StructureWall>>
-		};
+		const damagedStructures = room.getDamagedStructures();
+		const rest = hasTower
+			? damagedStructures.filter((s): s is Exclude<typeof s, StructureWall | StructureRampart> => !(s.structureType === STRUCTURE_WALL || s.structureType === STRUCTURE_RAMPART))
+			: [];
 
-		if (rest && rest.length !== 0) {
-			const owned = rest.filter(s => ("my" in s) && s.my) as Array<Exclude<AnyOwnedStructure, StructureRampart>>;
+		if (rest.length !== 0) {
+			const owned = rest.filter((s): s is Extract<typeof s, AnyOwnedStructure> => ("my" in s) && s.my);
 			if (owned.length !== 0) {
-				return creep.pos.findClosestByPath(owned);
+				return owned;
 			}
 
 			const roadsContainers = rest.filter(s => s.structureType === STRUCTURE_ROAD || s.structureType === STRUCTURE_CONTAINER) as Array<StructureRoad | StructureContainer>;
 			if (roadsContainers.length !== 0) {
-				return creep.pos.findClosestByPath(roadsContainers);
+				return roadsContainers;
 			}
 
-			return creep.pos.findClosestByPath(rest);
+			return rest;
 		}
 
-		const rampartsWalls = ([] as Array<StructureRampart | StructureWall>).concat(ramparts, walls);
+		const rampartsWalls = damagedStructures.filter((s): s is StructureWall | StructureRampart => s.structureType === STRUCTURE_WALL || s.structureType === STRUCTURE_RAMPART);
 		if (rampartsWalls.length !== 0) {
-			let structure: undefined | StructureRampart | StructureWall = undefined;
-
 			for (let i = 0; i < 1; i += 0.0001) {
-				if ((structure = _.find(rampartsWalls, r => (r.hits / r.hitsMax) < i))) {
-					return structure;
+				const structures = _.filter(rampartsWalls, r => (r.hits / r.hitsMax) < i && (
+					r.structureType === STRUCTURE_RAMPART ? r.hits < 300000 : true
+				));
+				if (structures.length !== 0) {
+					return structures;
 				}
 			}
 		}
 
-		return null;
+		return [];
 	}
 }
 

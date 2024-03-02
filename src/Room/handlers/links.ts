@@ -14,6 +14,8 @@ export function roomHandlerLinks(room: Room) {
 	if (!baseLink) {
 		Logging.warning(`${room} base link is missing`);
 		return;
+	} else if (baseLink.store.getUsedCapacity(RESOURCE_ENERGY) !== 0) {
+		return;
 	}
 	const otherLinks = links.filter(l => l.id !== baseLink.id);
 

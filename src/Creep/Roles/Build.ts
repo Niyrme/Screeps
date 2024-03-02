@@ -31,7 +31,7 @@ export class RoleBuild extends BaseRole {
 				} as RoleBuild.Creep["memory"],
 			},
 			{
-				role: RoleBuild.NAME,
+				role: this.NAME,
 			},
 		);
 	}
@@ -51,7 +51,7 @@ export class RoleBuild extends BaseRole {
 		}
 
 		if (creep.memory.gather) {
-			return RoleBuild.gather(creep);
+			return this.gather(creep);
 		} else {
 			let site: null | ConstructionSite = null;
 			if (creep.memory.site) {
@@ -67,12 +67,8 @@ export class RoleBuild extends BaseRole {
 			if (site) {
 				creep.memory.site = site.id;
 
-				const err = creep.build(site);
-				if (err === ERR_NOT_IN_RANGE) {
-					creep.travelTo(site, { range: 3 });
-					return creep.build(site);
-				}
-				return err;
+				creep.travelTo(site, { range: 3})
+				return creep.build(site)
 			} else {
 				creep.memory.recycleSelf = true;
 			}

@@ -1,10 +1,12 @@
 import { RoleAttack } from "./Attack.ts";
 import { RoleBuild } from "./Build.ts";
 import { RoleClaim } from "./Claim.ts";
+import { RoleDefend } from "./Defend.ts";
 import { RoleExplore } from "./Explore.ts";
 import { RoleHarvest } from "./Harvest.ts";
 import { RoleHaul } from "./Haul.ts";
 import { RoleHeal } from "./Heal.ts";
+import { RoleManage } from "./Manage.ts";
 import { RoleMine } from "./Mine.ts";
 import { RoleRepair } from "./Repair.ts";
 import { RoleReserve } from "./Reserve.ts";
@@ -14,10 +16,12 @@ export const Roles: AllRoles = {
 	[RoleAttack.NAME]: RoleAttack,
 	[RoleBuild.NAME]: RoleBuild,
 	[RoleClaim.NAME]: RoleClaim,
+	[RoleDefend.NAME]: RoleDefend,
 	[RoleExplore.NAME]: RoleExplore,
 	[RoleHarvest.NAME]: RoleHarvest,
 	[RoleHaul.NAME]: RoleHaul,
 	[RoleHeal.NAME]: RoleHeal,
+	[RoleManage.NAME]: RoleManage,
 	[RoleMine.NAME]: RoleMine,
 	[RoleRepair.NAME]: RoleRepair,
 	[RoleReserve.NAME]: RoleReserve,
@@ -28,10 +32,12 @@ export {
 	RoleAttack,
 	RoleBuild,
 	RoleClaim,
+	RoleDefend,
 	RoleExplore,
 	RoleHarvest,
 	RoleHaul,
 	RoleHeal,
+	RoleManage,
 	RoleMine,
 	RoleRepair,
 	RoleReserve,

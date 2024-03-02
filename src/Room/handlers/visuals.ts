@@ -1,10 +1,10 @@
 export function roomHandlerVisuals(room: Room) {
 	if (!room.controller?.my) { return; }
 
-	const visual = new RoomVisual(room.name)
+	const visual = new RoomVisual(room.name);
 
 	visual.text(
-		`${((room.controller.progress / room.controller.progressTotal) * 100).toFixed(3)}%`,
+		`${(room.controller.progressTotal - room.controller.progress)}`,
 		room.controller.pos.x,
 		room.controller.pos.y - 1,
 		{ align: "center" },
@@ -13,7 +13,7 @@ export function roomHandlerVisuals(room: Room) {
 	for (const spawn of room.find(FIND_MY_SPAWNS)) {
 		if (spawn.spawning) {
 			visual.text(
-				`${((1 - ((spawn.spawning.remainingTime + 1) / spawn.spawning.needTime)) * 100).toFixed(1)}%`,
+				`${spawn.spawning.remainingTime - 1}`,
 				spawn.pos.x,
 				spawn.pos.y - 1,
 				{ align: "center" },

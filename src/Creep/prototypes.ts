@@ -1,3 +1,5 @@
+import { UnreachableError } from "Utils";
+
 declare global {
 	interface CreepName {
 		spawnTime: number;
@@ -11,6 +13,8 @@ declare global {
 
 	interface Creep {
 		decodeName(): CreepName;
+
+		dumpAllResources(dest: StructureStorage | StructureContainer): ScreepsReturnCode;
 	}
 
 	interface CreepConstructor {
@@ -36,6 +40,21 @@ Creep.prototype.decodeName = function () {
 		spawnTime: parseInt(time, 36),
 		role: Memory.roleMap[parseInt(roleID, 36)],
 	};
+};
+
+Creep.prototype.dumpAllResources = function (dest) {
+	if (!this.store.getUsedCapacity()) {
+		return ERR_NOT_ENOUGH_RESOURCES;
+	}
+
+	for (const resourceType of Object.keys(this.store) as Array<ResourceConstant>) {
+		if (this.store.getUsedCapacity(resourceType)) {
+			this.travelTo(dest);
+			return this.transfer(dest, resourceType);
+		}
+	}
+
+	throw new UnreachableError(`${this}.dumpAllResources(${dest}) store was empty`);
 };
 
 export {};

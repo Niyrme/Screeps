@@ -1,4 +1,4 @@
-import { RoleBuild, RoleHarvest, RoleHaul, RoleMine, RoleRepair, RoleUpgrade } from "Creep";
+import { RoleBuild, RoleDefend, RoleHarvest, RoleHaul, RoleManage, RoleMine, RoleRepair, RoleUpgrade } from "Creep";
 
 export function roomHandlerSpawning(room: Room) {
 	if (!room.controller?.my) { return; }
@@ -27,6 +27,15 @@ export function roomHandlerSpawning(room: Room) {
 				break;
 		}
 		return err;
+	}
+
+	if (room.memory.attackTargets.length !== 0) {
+		const defenders = creeps.filter((c): c is RoleDefend.Creep => c.decodeName().role === RoleDefend.NAME);
+
+		for (let i = defenders.length; i < room.memory.attackTargets.length * 1.5; i++) {
+			if (spawns.length === 0) { return; }
+			handleSpawnError(RoleDefend.spawn(spawns[0]), true);
+		}
 	}
 
 	const minerCount = creeps.filter(c => c.decodeName().role === RoleMine.NAME).length;
@@ -61,13 +70,19 @@ export function roomHandlerSpawning(room: Room) {
 		}
 	}
 
-	const haulers = creeps.filter(c => c.decodeName().role === RoleHaul.NAME) as Array<RoleHaul.Creep>;
+	const haulers = creeps.filter((c): c is RoleHaul.Creep => c.decodeName().role === RoleHaul.NAME);
 	for (let i = haulers.length; i < minerCount; i++) {
 		if (spawns.length === 0) { return; }
 		handleSpawnError(RoleHaul.spawn(spawns[0], haulers.length === 0), haulers.length === 0);
 	}
 
-	const upgraders = creeps.filter(c => c.decodeName().role === RoleUpgrade.NAME) as Array<RoleUpgrade.Creep>;
+	const hasHandler = creeps.filter((c): c is RoleManage.Creep => c.decodeName().role === RoleManage.NAME).length !== 0;
+	if (!hasHandler) {
+		if (spawns.length === 0) { return; }
+		handleSpawnError(RoleManage.spawn(spawns[0]), true);
+	}
+
+	const upgraders = creeps.filter((c): c is RoleUpgrade.Creep => c.decodeName().role === RoleUpgrade.NAME);
 	for (let i = upgraders.length; i < Math.clamp(9 - room.controller.level, 1, 3); i++) {
 		if (spawns.length === 0) { return; }
 		handleSpawnError(RoleUpgrade.spawn(spawns[0], room.controller));
@@ -76,16 +91,14 @@ export function roomHandlerSpawning(room: Room) {
 	if (spawns.length === 0) { return; }
 
 	if (room.find(FIND_MY_STRUCTURES, { filter: s => s.structureType === STRUCTURE_TOWER }).length !== 0) {
-		const repairers = creeps.filter(c => c.decodeName().role === RoleRepair.NAME) as Array<RoleRepair.Creep>;
+		const repairers = creeps.filter((c): c is RoleRepair.Creep => c.decodeName().role === RoleRepair.NAME);
 		if (repairers.length < 1) {
 			handleSpawnError(RoleRepair.spawn(spawns[0]));
 		}
 	} else {
-		const damagedStructures = room.find(FIND_STRUCTURES, {
-			filter: s => (("my" in s) ? s.my : true) && s.hits < s.hitsMax,
-		});
+		const damagedStructures = room.getDamagedStructures();
 		if (damagedStructures.length !== 0) {
-			const repairers = creeps.filter(c => c.decodeName().role === RoleRepair.NAME) as Array<RoleRepair.Creep>;
+			const repairers = creeps.filter((c): c is RoleRepair.Creep => c.decodeName().role === RoleRepair.NAME);
 			for (
 				let i = repairers.length;
 				i < Math.clamp(Math.floor(Math.sqrt(damagedStructures.length)), 0, 3);
@@ -101,7 +114,7 @@ export function roomHandlerSpawning(room: Room) {
 
 	const constructionSites = room.getConstructionSites();
 	if (constructionSites.length !== 0) {
-		const builders = creeps.filter(c => c.decodeName().role === RoleBuild.NAME) as Array<RoleBuild.Creep>;
+		const builders = creeps.filter((c): c is RoleBuild.Creep => c.decodeName().role === RoleBuild.NAME);
 		const constructionCost = constructionSites.reduce((cost, site) => cost + site.progressTotal - site.progress, 0);
 		for (
 			let i = builders.length;

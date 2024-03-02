@@ -13,9 +13,8 @@ export function creepManager(creep: Creep) {
 				creep.travelTo(spawn);
 				spawn.recycleCreep(creep);
 			}
-		} else {
-			return;
 		}
+		return;
 	}
 
 	const { role } = creep.decodeName();

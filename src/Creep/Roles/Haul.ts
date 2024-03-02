@@ -51,13 +51,24 @@ export class RoleHaul extends BaseRole {
 		}
 
 		if (creep.memory.gather) {
-			let resources = creep.room.getResources().filter(e => {
-				if ("structureType" in e) {
-					return e.structureType !== STRUCTURE_STORAGE;
-				} else {
-					return true;
-				}
-			});
+			const { dropped, tombstones, ruins, strucutres } = creep.room.getResources();
+			const resources = [
+				...dropped.map(d => Game.getObjectById(d.id)),
+				...tombstones.map(t => Game.getObjectById(t.id)),
+				...ruins.map(r => Game.getObjectById(r.id)),
+				...strucutres.map(s => Game.getObjectById(s.id)),
+			]
+				.filter((v): v is Exclude<typeof v, null> => !!v)
+				.filter((r): r is Exclude<typeof r, StructureLink | StructureStorage> => {
+					if ("structureType" in r) {
+						return !(
+							r.structureType === STRUCTURE_LINK
+							|| r.structureType === STRUCTURE_STORAGE
+						);
+					} else {
+						return true;
+					}
+				});
 
 			if (resources.length === 0) {
 				if (creep.store.getUsedCapacity() !== 0) {
@@ -65,22 +76,6 @@ export class RoleHaul extends BaseRole {
 				}
 				return ERR_NOT_FOUND;
 			}
-
-			const link = _.find(
-				resources,
-				e => ("structureType" in e) && e.structureType === STRUCTURE_LINK,
-			) as undefined | StructureLink;
-
-			if (link && link.store.getUsedCapacity(RESOURCE_ENERGY) !== 0) {
-				const err = creep.withdraw(link, RESOURCE_ENERGY);
-				if (err === ERR_NOT_IN_RANGE) {
-					creep.travelTo(link);
-					return creep.withdraw(link, RESOURCE_ENERGY);
-				}
-				return err;
-			}
-
-			resources = resources.filter(r => ("structureType" in r) ? r.structureType !== STRUCTURE_LINK : true);
 
 			const notContainers = resources.filter(r => {
 				if ("structureType" in r) {
@@ -92,10 +87,7 @@ export class RoleHaul extends BaseRole {
 
 			const target = creep.pos.findClosestByPath(
 				notContainers.length !== 0 ? notContainers : resources,
-				{
-					ignoreCreeps: true,
-					filter: s => ("structureType" in s) ? s.structureType !== STRUCTURE_LINK : true,
-				},
+				{ ignoreCreeps: true },
 			);
 
 			if (target) {
@@ -133,74 +125,29 @@ export class RoleHaul extends BaseRole {
 
 			return ERR_NOT_FOUND;
 		} else {
-			if (creep.store.getUsedCapacity(RESOURCE_ENERGY) !== 0) {
-				const structures = creep.room.find(FIND_MY_STRUCTURES, {
-					filter(s) {
-						switch (s.structureType) {
-							case STRUCTURE_SPAWN:
-							case STRUCTURE_EXTENSION:
-							case STRUCTURE_TOWER:
-								return s.store.getFreeCapacity(RESOURCE_ENERGY) !== 0;
-							default:
-								return false;
-						}
-					},
-				}) as Array<StructureSpawn | StructureExtension | StructureTower>;
+			const baseStorage = this.getBaseStorage(creep);
 
-				const spawnsExtensions = structures.filter(s => {
-					return s.structureType === STRUCTURE_SPAWN || s.structureType === STRUCTURE_EXTENSION;
-				}) as Array<StructureSpawn | StructureExtension>;
-
-				const dest = creep.pos.findClosestByPath(
-					spawnsExtensions.length !== 0 ? spawnsExtensions : structures,
-					{ ignoreCreeps: true },
-				);
-
-				if (dest) {
-					const err = creep.transfer(dest, RESOURCE_ENERGY);
-					if (err === ERR_NOT_IN_RANGE) {
-						creep.travelTo(dest);
-						return creep.transfer(dest, RESOURCE_ENERGY);
-					}
-					return err;
-				}
-			}
-
-			if (creep.room.storage || Game.rooms[creep.memory.home].storage) {
-				const storage = (creep.room.storage || Game.rooms[creep.memory.home].storage)!;
-
-				for (const resourceType of Object.keys(creep.store) as Array<ResourceConstant>) {
-					if (creep.store.getUsedCapacity(resourceType) !== 0) {
-						const err = creep.transfer(storage, resourceType);
-						if (err === ERR_NOT_IN_RANGE) {
-							creep.travelTo(storage);
-							return creep.transfer(storage, resourceType);
-						}
-						return err;
-					}
-				}
+			if (baseStorage) {
+				return creep.dumpAllResources(baseStorage);
 			} else {
-				const flag = Game.flags[creep.room.name] || Game.flags[creep.memory.home];
-				if (flag) {
-					const [container] = flag.pos.lookFor(LOOK_STRUCTURES)
-						.filter(s => s.structureType === STRUCTURE_CONTAINER) as Array<StructureContainer>;
+				const sinks = creep.room.getTickCache().structures
+					.map<AnyStructure>(Game.getObjectById)
+					.filter((s): s is Extract<typeof s, AnyStoreStructure> => ("store" in s) && !!s.store.getFreeCapacity())
+					.filter((s): s is Extract<typeof s, StructureSpawn | StructureExtension | StructureTower> => (
+						s.structureType === STRUCTURE_SPAWN
+						|| s.structureType === STRUCTURE_EXTENSION
+						|| s.structureType === STRUCTURE_TOWER
+					));
 
-					if (container) {
-						for (const resourceType of Object.keys(creep.store) as Array<ResourceConstant>) {
-							if (creep.store.getUsedCapacity(resourceType) !== 0) {
-								const err = creep.transfer(container, resourceType);
-								if (err === ERR_NOT_IN_RANGE) {
-									creep.travelTo(container);
-									return creep.transfer(container, resourceType);
-								}
-								return err;
-							}
-						}
-					}
+				const target = creep.pos.findClosestByPath(sinks, { ignoreCreeps: true });
+
+				if (target) {
+					creep.travelTo(target);
+					return creep.transfer(target, RESOURCE_ENERGY);
+				} else {
+					return ERR_NOT_FOUND;
 				}
 			}
-
-			return ERR_NOT_FOUND;
 		}
 	}
 }

@@ -18,9 +18,13 @@ function towersDefend(room: Room): boolean {
 
 		if (room.memory.attackTargets.length === 0) { return false; }
 
-		const creep = Game.getObjectById(room.memory.attackTargets[0])!;
+		let i = 0;
+		getTowers(room)
+			.forEach(tower => tower.attack(Game.getObjectById(room.memory.attackTargets[i++ % room.memory.attackTargets.length])!));
 
-		getTowers(room).forEach(tower => tower.attack(creep));
+		// const creep = Game.getObjectById(room.memory.attackTargets[0])!;
+
+		// getTowers(room).forEach(tower => tower.attack(creep));
 		return true;
 	} else {
 		return false;
@@ -46,11 +50,10 @@ function towersHeal(room: Room): boolean {
 }
 
 function towersRepair(room: Room): boolean {
-	const { ramparts, rest } = room.getDamagedStructures({
-		walls: false,
-		ramparts: true,
-		rest: true,
-	});
+	const damaged = room.getDamagedStructures()
+		.filter((s): s is Exclude<typeof s, StructureWall> => s.structureType !== STRUCTURE_WALL);
+
+	const rest = damaged.filter((s): s is Exclude<typeof s, StructureRampart> => s.structureType !== STRUCTURE_RAMPART);
 
 	let target: null | Exclude<AnyStructure, StructureWall> = null;
 	if (rest.length !== 0) {
@@ -61,8 +64,10 @@ function towersRepair(room: Room): boolean {
 				return weakest;
 			}
 		});
-	} else if (ramparts.length !== 0) {
-		const r = ramparts.filter(rampart => rampart.hits < 300000 && ((rampart.hits / rampart.hitsMax) < 0.4));
+	} else {
+		const ramparts = damaged.filter((s): s is Extract<typeof s, StructureRampart> => s.structureType === STRUCTURE_RAMPART);
+
+		const r = ramparts.filter(rampart => rampart.hits < 350000 && ((rampart.hits / rampart.hitsMax) < 0.4));
 		if (r.length !== 0) {
 			target = r.reduce((weakest, current) => current.hits < weakest.hits ? current : weakest);
 		}

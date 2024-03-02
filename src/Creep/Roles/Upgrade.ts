@@ -42,16 +42,12 @@ export class RoleUpgrade extends BaseRole {
 		}
 
 		if (creep.memory.gather) {
-			return RoleUpgrade.gather(creep);
+			return this.gather(creep);
 		} else {
 			const controller = Game.getObjectById(creep.memory.controller)!;
 
-			const err = creep.upgradeController(controller);
-			if (err === ERR_NOT_IN_RANGE) {
-				creep.travelTo(controller, { range: 3 });
-				return creep.upgradeController(controller);
-			}
-			return err;
+			creep.travelTo(controller, { range: 3 });
+			return creep.upgradeController(controller);
 		}
 	}
 }

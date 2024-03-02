@@ -82,12 +82,8 @@ export class RoleHarvest extends BaseRole {
 				creep.memory.source = source.id;
 			}
 
-			const err = creep.harvest(source);
-			if (err === ERR_NOT_IN_RANGE) {
-				creep.travelTo(source);
-				return creep.harvest(source);
-			}
-			return err;
+			creep.travelTo(source);
+			return creep.harvest(source);
 		} else {
 			type EnergyStructure = StructureSpawn | StructureExtension | StructureTower
 			const structures: Array<EnergyStructure> = creep.room.find(FIND_MY_STRUCTURES, {
@@ -129,12 +125,8 @@ export class RoleHarvest extends BaseRole {
 			}
 
 			if (dest) {
-				const err = creep.transfer(dest, RESOURCE_ENERGY);
-				if (err === ERR_NOT_IN_RANGE) {
-					creep.travelTo(dest);
-					return creep.transfer(dest, RESOURCE_ENERGY);
-				}
-				return err;
+				creep.travelTo(dest);
+				return creep.transfer(dest, RESOURCE_ENERGY);
 			} else {
 				return ERR_NOT_FOUND;
 			}
