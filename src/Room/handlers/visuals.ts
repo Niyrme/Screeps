@@ -15,8 +15,8 @@ export function roomHandlerVisuals(room: Room) {
 			visual.text(
 				`${spawn.spawning.remainingTime - 1}`,
 				spawn.pos.x,
-				spawn.pos.y - 1,
-				{ align: "center" },
+				spawn.pos.y + 0.25,
+				{ align: "center", color: "#96f" },
 			);
 		}
 	}

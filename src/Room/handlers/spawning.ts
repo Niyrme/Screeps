@@ -38,6 +38,12 @@ export function roomHandlerSpawning(room: Room) {
 		}
 	}
 
+	const hasManager = creeps.filter((c): c is RoleManage.Creep => c.decodeName().role === RoleManage.NAME).length !== 0;
+	if (!hasManager) {
+		if (spawns.length === 0) { return; }
+		handleSpawnError(RoleManage.spawn(spawns[0], creeps.length <= 3), true);
+	}
+
 	for (const sourceID of Object.keys(room.memory.resources.energy)) {
 		if (spawns.length === 0) { return; }
 
@@ -73,12 +79,6 @@ export function roomHandlerSpawning(room: Room) {
 	if (!hasHauler) {
 		if (spawns.length === 0) { return; }
 		handleSpawnError(RoleHaul.spawn(spawns[0]), true);
-	}
-
-	const hasHandler = creeps.filter((c): c is RoleManage.Creep => c.decodeName().role === RoleManage.NAME).length !== 0;
-	if (!hasHandler) {
-		if (spawns.length === 0) { return; }
-		handleSpawnError(RoleManage.spawn(spawns[0]), true);
 	}
 
 	const upgraders = creeps.filter((c): c is RoleUpgrade.Creep => c.decodeName().role === RoleUpgrade.NAME);

@@ -52,7 +52,15 @@ export class RoleHaul extends BaseRole {
 		}
 
 		if (creep.memory.renew) {
-			return this.renew(creep);
+			const err = this.renew(creep);
+			switch (err) {
+				case ERR_NOT_FOUND:
+				case ERR_NOT_ENOUGH_RESOURCES:
+					creep.memory.renew = false;
+					break;
+				default:
+					return err;
+			}
 		}
 
 		if (creep.memory.gather && creep.store.getFreeCapacity() === 0) {

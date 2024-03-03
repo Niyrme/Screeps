@@ -589,13 +589,13 @@ const STATE_DEST_ROOMNAME = 6;
 
 // assigns a function to Creep.Prototype: creep.travelTo(destination)
 Creep.prototype.travelTo = function (destination: RoomPosition | { pos: RoomPosition }, options?: TravelToOptions) {
-	const { obstacles, ...rest } = options || {};
+	const modifiedOptions = options || {};
+	if (this.decodeName().role !== "manage") {
+		if (!("obstacles" in modifiedOptions)) {
+			modifiedOptions.obstacles = [];
+		}
+		modifiedOptions.obstacles!.push(Game.flags[(("pos" in destination) ? destination.pos : destination).roomName]);
+	}
 
-	const modifiedOptions = {
-		...rest,
-		obstacles: (obstacles || []).concat(
-			[Game.flags[(("pos" in destination) ? destination.pos : destination).roomName]],
-		),
-	};
 	return Traveler.travelTo(this, destination, modifiedOptions);
 };
