@@ -28,7 +28,7 @@ export class RoleUpgrade extends BaseRole {
 					recycleSelf: false,
 					gather: true,
 					controller: controller?.id || spawn.room.controller!.id,
-				} as RoleUpgrade.Creep["memory"],
+				} satisfies RoleUpgrade.Creep["memory"] as RoleUpgrade.Creep["memory"],
 			},
 			{ role: RoleUpgrade.NAME },
 		);

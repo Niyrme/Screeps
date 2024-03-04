@@ -37,7 +37,7 @@ export class RoleHaul extends BaseRole {
 					home: spawn.room.name,
 					recycleSelf: false,
 					gather: true,
-				} as RoleHaul.Creep["memory"],
+				} satisfies RoleHaul.Creep["memory"] as RoleHaul.Creep["memory"],
 			},
 			{ role: RoleHaul.NAME },
 		);
@@ -77,7 +77,7 @@ export class RoleHaul extends BaseRole {
 				return ERR_NOT_FOUND;
 			}
 
-			const notContainers = resources.filter(r => {
+			const notContainers = resources.filter((r): r is Exclude<typeof r, StructureContainer> => {
 				if ("structureType" in r) {
 					return r.structureType !== STRUCTURE_CONTAINER;
 				} else {

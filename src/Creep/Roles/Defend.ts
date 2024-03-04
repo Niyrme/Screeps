@@ -44,7 +44,7 @@ export class RoleDefend extends BaseRole {
 					home: spawn.room.name,
 					recycleSelf: false,
 					target: null,
-				} as RoleDefend.Creep["memory"],
+				} satisfies RoleDefend.Creep["memory"] as RoleDefend.Creep["memory"],
 			},
 			{
 				role: RoleDefend.NAME,
@@ -68,11 +68,11 @@ export class RoleDefend extends BaseRole {
 
 		if (!target) {
 			const targets = creep.room.memory.attackTargets
-				.map(Game.getObjectById)
-				.filter(c => !!c) as Array<Creep | PowerCreep>;
+				.map<null | Creep | PowerCreep>(Game.getObjectById)
+				.filter((c): c is Exclude<typeof c, null> => !!c);
 
 			if (targets.length !== 0) {
-				target = creep.pos.findClosestByPath(targets, {ignoreCreeps: true});
+				target = creep.pos.findClosestByPath(targets, { ignoreCreeps: true });
 			}
 		}
 

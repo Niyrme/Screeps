@@ -30,7 +30,7 @@ export class RoleRepair extends BaseRole {
 					recycleSelf: false,
 					gather: true,
 					structure: structure?.id || null,
-				} as RoleRepair.Creep["memory"],
+				} satisfies RoleRepair.Creep["memory"] as RoleRepair.Creep["memory"],
 			},
 			{
 				role: RoleRepair.NAME,

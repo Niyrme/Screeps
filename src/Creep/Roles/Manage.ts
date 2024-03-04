@@ -46,8 +46,7 @@ export class RoleManage extends BaseRole {
 					home: spawn.room.name,
 					recycleSelf: false,
 					fillMany: null,
-					renew: false,
-				} as RoleManage.Creep["memory"],
+				} satisfies RoleManage.Creep["memory"] as RoleManage.Creep["memory"],
 			},
 			{
 				role: this.NAME,

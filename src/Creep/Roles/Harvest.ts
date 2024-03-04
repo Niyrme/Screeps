@@ -42,7 +42,7 @@ export class RoleHarvest extends BaseRole {
 					recycleSelf: false,
 					harvest: true,
 					source: null,
-				} as RoleHarvest.Creep["memory"],
+				} satisfies RoleHarvest.Creep["memory"] as RoleHarvest.Creep["memory"],
 			},
 			{ role: RoleHarvest.NAME },
 		);
@@ -85,9 +85,8 @@ export class RoleHarvest extends BaseRole {
 			creep.travelTo(source);
 			return creep.harvest(source);
 		} else {
-			type EnergyStructure = StructureSpawn | StructureExtension | StructureTower
-			const structures: Array<EnergyStructure> = creep.room.find(FIND_MY_STRUCTURES, {
-				filter(s) {
+			const structures = creep.room.find(FIND_MY_STRUCTURES, {
+				filter(s): s is Extract<typeof s, StructureSpawn | StructureExtension | StructureTower> {
 					switch (s.structureType) {
 						case STRUCTURE_SPAWN:
 						case STRUCTURE_EXTENSION:
@@ -99,9 +98,9 @@ export class RoleHarvest extends BaseRole {
 				},
 			});
 
-			const notTowers = structures.filter(s => s.structureType !== STRUCTURE_TOWER) as Array<Exclude<EnergyStructure, StructureTower>>;
+			const notTowers = structures.filter((s): s is Exclude<typeof s, StructureTower> => s.structureType !== STRUCTURE_TOWER);
 
-			let dest: null | EnergyStructure | StructureStorage | StructureContainer = creep.pos.findClosestByPath(
+			let dest: null | (typeof structures)[0] | StructureStorage | StructureContainer = creep.pos.findClosestByPath(
 				notTowers.length !== 0
 					? notTowers
 					: structures,
@@ -116,7 +115,7 @@ export class RoleHarvest extends BaseRole {
 				const flag = Game.flags[creep.room.name] || Game.flags[creep.memory.home];
 				if (flag) {
 					const [container] = flag.pos.lookFor(LOOK_STRUCTURES)
-						.filter(s => s.structureType === STRUCTURE_CONTAINER) as Array<StructureContainer>;
+						.filter((s): s is StructureContainer => s.structureType === STRUCTURE_CONTAINER);
 
 					if (container) {
 						dest = container;

@@ -28,7 +28,7 @@ export class RoleBuild extends BaseRole {
 					recycleSelf: false,
 					gather: true,
 					site: constructionSite,
-				} as RoleBuild.Creep["memory"],
+				} satisfies RoleBuild.Creep["memory"] as RoleBuild.Creep["memory"],
 			},
 			{
 				role: this.NAME,
