@@ -11,7 +11,6 @@ declare global {
 export namespace RoleHaul {
 	export interface Memory {
 		gather: boolean;
-		renew: boolean;
 	}
 
 	export type Creep = BaseCreep<Memory>
@@ -45,24 +44,6 @@ export class RoleHaul extends BaseRole {
 	}
 
 	public static execute(creep: RoleHaul.Creep): ScreepsReturnCode {
-		if ((creep.ticksToLive || Infinity) < 100 && !creep.memory.renew) {
-			creep.memory.renew = true;
-		} else if (creep.memory.renew && (creep.ticksToLive || -Infinity) >= CREEP_LIFE_TIME * 0.99) {
-			creep.memory.renew;
-		}
-
-		if (creep.memory.renew) {
-			const err = this.renew(creep);
-			switch (err) {
-				case ERR_NOT_FOUND:
-				case ERR_NOT_ENOUGH_RESOURCES:
-					creep.memory.renew = false;
-					break;
-				default:
-					return err;
-			}
-		}
-
 		if (creep.memory.gather && creep.store.getFreeCapacity() === 0) {
 			creep.memory.gather = false;
 		} else if ((!creep.memory.gather) && creep.store.getUsedCapacity() === 0) {

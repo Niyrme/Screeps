@@ -3,6 +3,7 @@ import { RoleBuild } from "./Build.ts";
 import { RoleClaim } from "./Claim.ts";
 import { RoleDefend } from "./Defend.ts";
 import { RoleExplore } from "./Explore.ts";
+import { RoleExtract } from "./Extract.ts";
 import { RoleHarvest } from "./Harvest.ts";
 import { RoleHaul } from "./Haul.ts";
 import { RoleHeal } from "./Heal.ts";
@@ -18,6 +19,7 @@ export const Roles: AllRoles = {
 	[RoleClaim.NAME]: RoleClaim,
 	[RoleDefend.NAME]: RoleDefend,
 	[RoleExplore.NAME]: RoleExplore,
+	[RoleExtract.NAME]: RoleExtract,
 	[RoleHarvest.NAME]: RoleHarvest,
 	[RoleHaul.NAME]: RoleHaul,
 	[RoleHeal.NAME]: RoleHeal,
@@ -34,6 +36,7 @@ export {
 	RoleClaim,
 	RoleDefend,
 	RoleExplore,
+	RoleExtract,
 	RoleHarvest,
 	RoleHaul,
 	RoleHeal,

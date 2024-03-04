@@ -1,4 +1,5 @@
 import { RoleBuild, RoleDefend, RoleHarvest, RoleHaul, RoleManage, RoleMine, RoleRepair, RoleUpgrade } from "Creep";
+import { CodeToString, Logging } from "Utils";
 
 export function roomHandlerSpawning(room: Room) {
 	if (!room.controller?.my) { return; }
@@ -8,14 +9,6 @@ export function roomHandlerSpawning(room: Room) {
 
 	if (spawns.length === 0) { return; }
 
-	const creeps = _.filter(Game.creeps, c => c.memory.home === room.name);
-
-	if (creeps.length === 0) {
-		for (const spawn of spawns) {
-			RoleHarvest.spawn(spawn);
-		}
-		return;
-	}
 
 	function handleSpawnError(err: StructureSpawn.SpawnCreepReturnType, shiftOnNoEnergy = false) {
 		switch (err) {
@@ -26,7 +19,30 @@ export function roomHandlerSpawning(room: Room) {
 				shiftOnNoEnergy && spawns.shift();
 				break;
 		}
+		Logging.debug(`err: ${CodeToString(err)}`);
 		return err;
+	}
+
+	const creeps = _.filter(Game.creeps, c => c.memory.home === room.name);
+
+	if (creeps.length === 0) {
+		for (const spawn of spawns) {
+			handleSpawnError(RoleHarvest.spawn(spawn, true));
+		}
+		return;
+	}
+
+	function attemptSpawn(fn: (spawn: StructureSpawn) => StructureSpawn.SpawnCreepReturnType, shiftOnNoEmpty = false): boolean {
+		if (spawns.length !== 0) {
+			const err = handleSpawnError(fn(spawns[0]), shiftOnNoEmpty);
+			if (shiftOnNoEmpty) {
+				return err === OK;
+			} else {
+				return true;
+			}
+		} else {
+			return false;
+		}
 	}
 
 	if (room.memory.attackTargets.length !== 0) {
@@ -40,8 +56,7 @@ export function roomHandlerSpawning(room: Room) {
 
 	const hasManager = creeps.filter((c): c is RoleManage.Creep => c.decodeName().role === RoleManage.NAME).length !== 0;
 	if (!hasManager) {
-		if (spawns.length === 0) { return; }
-		handleSpawnError(RoleManage.spawn(spawns[0], creeps.length <= 3), true);
+		if (!attemptSpawn(spawn => RoleManage.spawn(spawn, creeps.length <= 3), true)) { return; }
 	}
 
 	for (const sourceID of Object.keys(room.memory.resources.energy)) {

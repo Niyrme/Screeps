@@ -20,7 +20,6 @@ export namespace RoleManage {
 
 	export interface Memory {
 		fillMany: null | Memory.FillMany;
-		renew: boolean;
 	}
 
 	export type Creep = BaseCreep<Memory>
@@ -32,11 +31,11 @@ export class RoleManage extends BaseRole {
 	public static spawn(spawn: StructureSpawn, bootstrap = false): StructureSpawn.SpawnCreepReturnType {
 		const baseBody: Array<BodyPartConstant> = [CARRY, MOVE];
 		const body = _.flatten(_.fill(
-			new Array(Math.floor(Creep.getBodyCost(baseBody) / (
+			new Array(Math.floor((
 				bootstrap
 					? spawn.room.energyAvailable
 					: spawn.room.energyCapacityAvailable
-			))),
+			) / Creep.getBodyCost(baseBody))),
 			baseBody,
 		));
 
@@ -61,31 +60,6 @@ export class RoleManage extends BaseRole {
 		if (!storage) {
 			Logging.error(`${creep} has no storage`);
 			return ERR_NOT_FOUND;
-		}
-
-		if ((creep.ticksToLive || Infinity) < 100 && !creep.memory.renew) {
-			creep.memory.renew = true;
-		} else if (creep.memory.renew && (creep.ticksToLive || -Infinity) >= CREEP_LIFE_TIME * 0.99) {
-			creep.memory.renew;
-		}
-
-		const hasHostiles = creep.room.find(FIND_HOSTILE_CREEPS).length !== 0;
-
-		if (creep.memory.renew && hasHostiles) {
-			creep.memory.renew = false;
-			// creep.memory.fillMany = null;
-		}
-
-		if (creep.memory.renew) {
-			const err = this.renew(creep);
-			switch (err) {
-				case ERR_NOT_FOUND:
-				case ERR_NOT_ENOUGH_RESOURCES:
-					creep.memory.renew = false;
-					break;
-				default:
-					return err;
-			}
 		}
 
 		if (creep.memory.fillMany) {
@@ -169,46 +143,52 @@ export class RoleManage extends BaseRole {
 				}
 			}
 
-			let availableCapacity = creep.store.getFreeCapacity(RESOURCE_ENERGY);
+			const storedEnergy = storage.store.getUsedCapacity(RESOURCE_ENERGY);
+			if (storedEnergy !== 0) {
+				let availableCapacity = Math.min(creep.store.getFreeCapacity(RESOURCE_ENERGY), storedEnergy);
 
-			const sinks = structures.filter((s): s is Extract<typeof s, StructureSpawn | StructureExtension | StructureTower> => {
-				switch (s.structureType) {
-					case STRUCTURE_SPAWN:
-					case STRUCTURE_EXTENSION:
-					case STRUCTURE_TOWER:
-						return s.store.getFreeCapacity(RESOURCE_ENERGY) !== 0;
-					default:
-						return false;
-				}
-			});
-
-			if (sinks.length !== 0) {
-				const ids: RoleManage.Memory.FillMany["ids"] = [];
-
-				sinks.forEach(sink => {
-					const free = sink.store.getFreeCapacity(RESOURCE_ENERGY);
-					if (free < availableCapacity) {
-						ids.push([sink.id, free]);
-						availableCapacity -= free;
+				const sinks = structures.filter((s): s is Extract<typeof s, StructureSpawn | StructureExtension | StructureTower> => {
+					switch (s.structureType) {
+						case STRUCTURE_SPAWN:
+						case STRUCTURE_EXTENSION:
+						case STRUCTURE_TOWER:
+							return s.store.getFreeCapacity(RESOURCE_ENERGY) !== 0;
+						default:
+							return false;
 					}
 				});
 
-				if (ids.length !== 0) {
-					creep.memory.fillMany = {
-						ids,
-						resource: RESOURCE_ENERGY,
-						gather: true,
-						idx: 0,
-					};
-				} else {
-					creep.memory.fillMany = {
-						ids: [[sinks[0].id, sinks[0].store.getFreeCapacity(RESOURCE_ENERGY)]],
-						resource: RESOURCE_ENERGY,
-						gather: true,
-						idx: 0,
-					};
+				if (sinks.length !== 0) {
+					const ids: RoleManage.Memory.FillMany["ids"] = [];
+
+					sinks.forEach(sink => {
+						const free = sink.store.getFreeCapacity(RESOURCE_ENERGY);
+						if (free < availableCapacity) {
+							ids.push([sink.id, free]);
+							availableCapacity -= free;
+						}
+					});
+
+					if (ids.length !== 0) {
+						creep.memory.fillMany = {
+							ids,
+							resource: RESOURCE_ENERGY,
+							gather: true,
+							idx: 0,
+						};
+					} else {
+						creep.memory.fillMany = {
+							ids: [[sinks[0].id, sinks[0].store.getFreeCapacity(RESOURCE_ENERGY)]],
+							resource: RESOURCE_ENERGY,
+							gather: true,
+							idx: 0,
+						};
+					}
+					return OK;
 				}
 			}
+
+			creep.travelTo(baseFlag, { range: 0 });
 		}
 
 		return OK;
