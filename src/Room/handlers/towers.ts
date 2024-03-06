@@ -50,7 +50,7 @@ function towersHeal(room: Room): boolean {
 }
 
 function towersRepair(room: Room): boolean {
-	const damaged = room.getDamagedStructures()
+	const damaged = room.getTickCache().damagedStructures
 		.filter((s): s is Exclude<typeof s, StructureWall> => s.structureType !== STRUCTURE_WALL);
 
 	const rest = damaged.filter((s): s is Exclude<typeof s, StructureRampart> => s.structureType !== STRUCTURE_RAMPART);

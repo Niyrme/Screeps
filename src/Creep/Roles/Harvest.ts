@@ -85,8 +85,8 @@ export class RoleHarvest extends BaseRole {
 			creep.travelTo(source);
 			return creep.harvest(source);
 		} else {
-			const structures = creep.room.find(FIND_MY_STRUCTURES, {
-				filter(s): s is Extract<typeof s, StructureSpawn | StructureExtension | StructureTower> {
+			const structures = creep.room.getTickCache().structures
+				.filter((s): s is Extract<typeof s, StructureSpawn | StructureExtension | StructureTower> => {
 					switch (s.structureType) {
 						case STRUCTURE_SPAWN:
 						case STRUCTURE_EXTENSION:
@@ -95,8 +95,7 @@ export class RoleHarvest extends BaseRole {
 						default:
 							return false;
 					}
-				},
-			});
+				});
 
 			const notTowers = structures.filter((s): s is Exclude<typeof s, StructureTower> => s.structureType !== STRUCTURE_TOWER);
 

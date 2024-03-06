@@ -61,7 +61,7 @@ export class RoleBuild extends BaseRole {
 			}
 
 			if (!site) {
-				site = creep.pos.findClosestByPath(creep.room.getConstructionSites());
+				site = creep.pos.findClosestByPath(creep.room.getTickCache().constructionSites);
 			}
 
 			if (site) {

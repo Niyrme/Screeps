@@ -125,19 +125,22 @@ export class RoleHaul extends BaseRole {
 
 			return ERR_NOT_FOUND;
 		} else {
-			const baseStorage = this.getBaseStorage(creep);
+			const { baseStorage, structures } = creep.room.getTickCache();
 
 			if (baseStorage) {
 				return creep.dumpAllResources(baseStorage);
 			} else {
-				const sinks = creep.room.getTickCache().structures
-					.map<AnyStructure>(Game.getObjectById)
-					.filter((s): s is Extract<typeof s, AnyStoreStructure> => ("store" in s) && !!s.store.getFreeCapacity())
-					.filter((s): s is Extract<typeof s, StructureSpawn | StructureExtension | StructureTower> => (
-						s.structureType === STRUCTURE_SPAWN
-						|| s.structureType === STRUCTURE_EXTENSION
-						|| s.structureType === STRUCTURE_TOWER
-					));
+				const sinks = structures
+					.filter((s): s is Extract<typeof s, StructureSpawn | StructureExtension | StructureTower> => {
+						switch (s.structureType) {
+							case STRUCTURE_SPAWN:
+							case STRUCTURE_EXTENSION:
+							case STRUCTURE_TOWER:
+								return s.store.getFreeCapacity(RESOURCE_ENERGY) !== 0;
+							default:
+								return false;
+						}
+					});
 
 				const target = creep.pos.findClosestByPath(sinks, { ignoreCreeps: true });
 

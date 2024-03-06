@@ -55,7 +55,7 @@ export class RoleManage extends BaseRole {
 	}
 
 	public static execute(creep: RoleManage.Creep): ScreepsReturnCode {
-		const storage = this.getBaseStorage(creep);
+		const { baseStorage: storage, structures } = creep.room.getTickCache()
 		if (!storage) {
 			Logging.error(`${creep} has no storage`);
 			return ERR_NOT_FOUND;
@@ -119,12 +119,10 @@ export class RoleManage extends BaseRole {
 		{
 			const baseFlag = Game.flags[creep.room.name];
 
-			const structures = creep.room.getTickCache().structures
-				.map<null | AnyStructure>(Game.getObjectById)
-				.filter((s): s is Exclude<typeof s, null> => !!s)
+			const storeStructures = structures
 				.filter((s): s is Extract<typeof s, AnyStoreStructure> => "store" in s);
 
-			const [link] = structures.filter((s): s is Extract<typeof s, StructureLink> => {
+			const [link] = storeStructures.filter((s): s is Extract<typeof s, StructureLink> => {
 				return s.structureType === STRUCTURE_LINK
 					&& s.store.getUsedCapacity(RESOURCE_ENERGY) !== 0
 					&& s.pos.isNearTo(baseFlag);
@@ -146,7 +144,7 @@ export class RoleManage extends BaseRole {
 			if (storedEnergy !== 0) {
 				let availableCapacity = Math.min(creep.store.getFreeCapacity(RESOURCE_ENERGY), storedEnergy);
 
-				const sinks = structures.filter((s): s is Extract<typeof s, StructureSpawn | StructureExtension | StructureTower> => {
+				const sinks = storeStructures.filter((s): s is Extract<typeof s, StructureSpawn | StructureExtension | StructureTower> => {
 					switch (s.structureType) {
 						case STRUCTURE_SPAWN:
 						case STRUCTURE_EXTENSION:

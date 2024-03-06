@@ -81,7 +81,7 @@ export class RoleRepair extends BaseRole {
 			filter: s => s.structureType === STRUCTURE_TOWER,
 		}).length !== 0;
 
-		const damagedStructures = room.getDamagedStructures();
+		const { damagedStructures } = room.getTickCache();
 		const rest = hasTower
 			? damagedStructures.filter((s): s is Exclude<typeof s, StructureWall | StructureRampart> => !(s.structureType === STRUCTURE_WALL || s.structureType === STRUCTURE_RAMPART))
 			: [];

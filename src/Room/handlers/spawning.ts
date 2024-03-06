@@ -64,7 +64,7 @@ export function roomHandlerSpawning(room: Room) {
 
 		const source = Game.getObjectById(sourceID)!;
 
-		const miner = _.find(creeps, creep => {
+		const miner = _.find(creeps, (creep): creep is RoleMine.Creep => {
 			switch (creep.decodeName().role) {
 				case RoleMine.NAME:
 					return (creep as RoleMine.Creep).memory.source === source.id;
@@ -78,15 +78,14 @@ export function roomHandlerSpawning(room: Room) {
 				filter: s => s.structureType === STRUCTURE_LINK,
 			}) as Array<StructureLink>;
 
-			handleSpawnError(
-				RoleMine.spawn(spawns[0], {
-					source: source.id,
-					minerRole: (!!link) ? "link" : "drop",
-					// @ts-ignore
-					link: link ? link.id : undefined,
-				}),
-				true,
-			);
+			const ok = attemptSpawn(spawn => RoleMine.spawn(spawn, {
+				source: source.id,
+				minerRole: (!!link) ? "link" : "drop",
+				// @ts-ignore
+				link: (!!link) ? link.id : undefined,
+			}), true);
+
+			if (!ok) { return; }
 		}
 	}
 
@@ -98,35 +97,26 @@ export function roomHandlerSpawning(room: Room) {
 
 	const upgraders = creeps.filter((c): c is RoleUpgrade.Creep => c.decodeName().role === RoleUpgrade.NAME);
 	for (let i = upgraders.length; i < Math.clamp(9 - room.controller.level, 1, 2); i++) {
-		if (spawns.length === 0) { return; }
-		handleSpawnError(RoleUpgrade.spawn(spawns[0], room.controller));
+		if (!attemptSpawn(spawn => RoleUpgrade.spawn(spawn, room.controller))) { return; }
 	}
 
 	if (spawns.length === 0) { return; }
 
-	if (room.find(FIND_MY_STRUCTURES, { filter: s => s.structureType === STRUCTURE_TOWER }).length !== 0) {
+	const { damagedStructures } = room.getTickCache();
+	if (damagedStructures.length !== 0) {
 		const repairers = creeps.filter((c): c is RoleRepair.Creep => c.decodeName().role === RoleRepair.NAME);
-		if (repairers.length < 1) {
-			handleSpawnError(RoleRepair.spawn(spawns[0]));
-		}
-	} else {
-		const damagedStructures = room.getDamagedStructures();
-		if (damagedStructures.length !== 0) {
-			const repairers = creeps.filter((c): c is RoleRepair.Creep => c.decodeName().role === RoleRepair.NAME);
-			for (
-				let i = repairers.length;
-				i < Math.clamp(Math.floor(Math.sqrt(damagedStructures.length)), 0, 3);
-				i++
-			) {
-				if (spawns.length === 0) { return; }
-				handleSpawnError(RoleRepair.spawn(spawns[0]));
-			}
+		for (
+			let i = repairers.length;
+			i < Math.clamp(Math.floor(Math.sqrt(damagedStructures.length)), 0, 3);
+			i++
+		) {
+			if (!attemptSpawn(spawn => RoleRepair.spawn(spawn))) { return; }
 		}
 	}
 
 	if (spawns.length === 0) { return; }
 
-	const constructionSites = room.getConstructionSites();
+	const { constructionSites } = room.getTickCache();
 	if (constructionSites.length !== 0) {
 		const builders = creeps.filter((c): c is RoleBuild.Creep => c.decodeName().role === RoleBuild.NAME);
 		const constructionCost = constructionSites.reduce((cost, site) => cost + site.progressTotal - site.progress, 0);
@@ -135,8 +125,7 @@ export function roomHandlerSpawning(room: Room) {
 			i < Math.clamp(Math.floor(Math.sqrt(constructionCost / 1000)), 1, 3);
 			i++
 		) {
-			if (spawns.length === 0) { return; }
-			handleSpawnError(RoleBuild.spawn(spawns[0]));
+			if (!attemptSpawn(spawn => RoleBuild.spawn(spawn))) { return; }
 		}
 	}
 }

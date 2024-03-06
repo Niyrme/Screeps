@@ -55,8 +55,9 @@ export class RoleExtract extends BaseRole {
 		const mineral = Game.getObjectById(creep.memory.mineral)!;
 
 		if (!creep.memory.atMineral) {
-			const [container] = mineral.pos.findInRange(FIND_STRUCTURES, 1, {
-				filter: (s): s is Extract<typeof s, StructureContainer> => s.structureType === STRUCTURE_CONTAINER,
+			const { structures } = creep.room.getTickCache();
+			const [container] = mineral.pos.findInRange(structures, 1, {
+				filter: (s: AnyStructure): s is Extract<typeof s, StructureContainer> => s.structureType === STRUCTURE_CONTAINER,
 			});
 
 			if (container) {
