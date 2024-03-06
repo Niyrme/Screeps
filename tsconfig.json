@@ -1,5 +1,6 @@
 {
 	"compilerOptions": {
+		"target": "ES2018",
 		"strict": true,
 		"allowImportingTsExtensions": true,
 		"noFallthroughCasesInSwitch": true,
@@ -8,7 +9,11 @@
 		"newLine": "lf",
 		"noUnusedLocals": true,
 		"noEmit": true,
-		"esModuleInterop": true
+		"esModuleInterop": true,
+		"baseUrl": "src",
+		"paths": {
+			"*": ["*/_index.ts"]
+		}
 	},
 	"include": [
 		"src/**/*"

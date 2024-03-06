@@ -1,14 +1,15 @@
 declare global {
-	// global memory
+	interface Global extends Record<any, any> {}
+
+	const global: Global;
+
+	type PartialRequired<T, Keys extends keyof T> = Omit<T, Keys> & Required<Pick<T, Keys>>
+}
+
+declare global {
 	interface Memory {
-	}
-
-	// creep memory
-	interface CreepMemory {
-	}
-
-	// creep prototypes
-	interface Creep {
+		debug: boolean;
+		creepID: number;
 	}
 }
 
