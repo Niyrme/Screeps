@@ -10,9 +10,14 @@
 		"noUnusedLocals": true,
 		"noEmit": true,
 		"esModuleInterop": true,
-		"baseUrl": "src",
 		"paths": {
-			"*": ["*/_index.ts"]
+			"Creep": ["src/Creep/_index.ts"],
+			"Events": ["src/Events/_index.ts"],
+			"Global": ["src/Global/_index.ts"],
+			"Lib": ["src/Lib/_index.ts"],
+			"Prototypes": ["src/Prototypes/_index.ts"],
+			"Room": ["src/Room/_index.ts"],
+			"Utils": ["src/Utils/_index.ts"]
 		}
 	},
 	"include": [

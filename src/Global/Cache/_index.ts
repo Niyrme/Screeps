@@ -1,5 +1,5 @@
-import CreepCache from "./Creep.ts";
-import RoomCache from "./Room.ts";
+import CreepCache from "./CreepCache.ts";
+import RoomCache from "./RoomCache.ts";
 
 interface Cache {
 	Creep: typeof CreepCache;

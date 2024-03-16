@@ -5,8 +5,7 @@ import swc from "@rollup/plugin-swc";
 import fs from "node:fs";
 import path from "node:path";
 import clear from "rollup-plugin-clear";
-import screepsDeploy from "./rollup/rollup-plugin-screeps-deploy.js";
-import screeps from "./rollup/rollup-plugin-screeps.js";
+import { screeps, screepsDeploy } from "./rollup/index";
 
 let cfg;
 const dest = process.env.DEST;

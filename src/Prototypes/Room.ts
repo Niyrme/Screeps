@@ -8,7 +8,8 @@ declare global {
 }
 
 Room.prototype.availableResources = function (resource) {
-	return this.find(FIND_STRUCTURES)
+	const { structures } = global.Cache.Room.get(this.name);
+	return structures
 		.filter((s): s is Extract<typeof s, AnyStoreStructure> => "store" in s)
 		.filter((s): s is Exclude<typeof s, StructureSpawn | StructureExtension | StructureTower> => {
 			switch (s.structureType) {

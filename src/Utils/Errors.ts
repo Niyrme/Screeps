@@ -21,13 +21,21 @@ export function CodeToString<C extends ScreepsReturnCode>(errorCode: C): string 
 }
 
 export class NotImplementedError extends Error {
-	constructor(context: string) {
-		super(`Not implemented: ${context}`);
+	constructor(message: string, context: Record<any, any> = {}) {
+		let contextMsg = Object.entries(context).map(([key, value]) => `${key}: ${value}`).join("\n");
+		if (contextMsg.length !== 0) {
+			contextMsg = `\n${contextMsg}`;
+		}
+		super(`Not implemented: ${message}${contextMsg}`);
 	}
 }
 
 export class UnreachableError extends Error {
-	constructor(context: string) {
-		super(`UNREACHABLE: ${context}`);
+	constructor(message: string, context: Record<any, any> = {}) {
+		let contextMsg = Object.entries(context).map(([key, value]) => `${key}: ${value}`).join("\n");
+		if (contextMsg.length !== 0) {
+			contextMsg = `\n${contextMsg}`;
+		}
+		super(`UNREACHABLE: ${message}${contextMsg}`);
 	}
 }
