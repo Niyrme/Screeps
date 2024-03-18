@@ -12,6 +12,14 @@ declare global {
 	}
 
 	interface RoomPosition {
+		findInRange<T extends _HasRoomPosition | RoomPosition>(
+			objects: Array<T>,
+			range: number,
+			opts?: {
+				filter: (<S extends T>(object: T) => object is S) | Record<string, any> | string
+			},
+		): Array<T>;
+
 		tryCreateConstructionSite(type: STRUCTURE_SPAWN, spawnName: string): RoomPosition.TryCreateConstructionSiteReturnCode;
 		tryCreateConstructionSite(type: Exclude<BuildableStructureConstant, STRUCTURE_SPAWN>, spawnName?: never): RoomPosition.TryCreateConstructionSiteReturnCode;
 	}

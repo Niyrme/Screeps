@@ -1,5 +1,4 @@
-import { EVENT_CREEP_SPAWNED } from "Creep";
-import { Logging } from "Utils";
+import { EVENT_CREEP_SPAWNED } from "Events";
 
 declare global {
 	export namespace StructureSpawn {
@@ -14,6 +13,7 @@ declare global {
 	}
 
 	interface StructureSpawn {
+		spawnCreep(body: Array<BodyPartConstant>, name: string, opts?: SpawnOptions): StructureSpawn.SpawnCreepReturnType;
 		newCreep(
 			body: Array<BodyPartConstant>,
 			opts: PartialRequired<SpawnOptions, "memory">,
@@ -34,14 +34,13 @@ StructureSpawn.prototype.newCreep = function (body, opts, encodeMemory) {
 	const err = this.spawnCreep(body, name, {
 		directions: [TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT, LEFT, TOP_LEFT],
 		...opts,
-	}) as StructureSpawn.SpawnCreepReturnType;
+	});
 
 	if (err === OK) {
 		global.EventBus.trigger(EVENT_CREEP_SPAWNED, {
 			name,
-			spawn: this.id,
-		} as IEventBus.Creep.Spawned.EventBody);
-		Logging.info(`new Creep ${name}`);
+			spawn: this,
+		});
 	}
 
 	return err;

@@ -2,7 +2,6 @@ import "./prototypes.ts";
 import { UnreachableError } from "Utils";
 import { Roles } from "./Roles/_index.ts";
 
-export * from "./events.ts";
 export * from "./Roles/_index.ts";
 
 export function creepManager(creep: Creep) {

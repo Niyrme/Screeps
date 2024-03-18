@@ -1,5 +1,5 @@
 import "./prototypes.ts";
-import { EVENT_ROOM_ATTACKED, EVENT_ROOM_RCL_CHANGE } from "./events.ts";
+import { EVENT_ROOM_ATTACKED, EVENT_ROOM_RCL_CHANGE } from "Events";
 import {
 	roomHandlerConstruction,
 	roomHandlerEvents,
@@ -8,8 +8,6 @@ import {
 	roomHandlerTowers,
 	roomHandlerVisuals,
 } from "./handlers/_index.ts";
-
-export * from "./events.ts";
 
 export function roomManager(room: Room) {
 	if (!room.memory.attackTargets) {
@@ -27,11 +25,9 @@ export namespace roomManager {
 	export const placeConstructionSites = roomHandlerConstruction;
 }
 
-global.EventBus.subscribe(EVENT_ROOM_ATTACKED, ({ room: roomName, creep: creepID }) => {
-	const room = Game.rooms[roomName];
+global.EventBus.subscribe(EVENT_ROOM_ATTACKED, ({ room, attacker }) => {
 	if (!room.controller?.my) { return; }
 
-	const attacker = Game.getObjectById(creepID)!;
 	if (!attacker) {
 		return;
 	} else if (attacker.my) {
@@ -40,17 +36,15 @@ global.EventBus.subscribe(EVENT_ROOM_ATTACKED, ({ room: roomName, creep: creepID
 		return;
 	}
 
-	if (!_.contains(room.memory.attackTargets, creepID)) {
-		room.memory.attackTargets.push(creepID as Id<Exclude<typeof attacker, StructureTower>>);
+	if (!_.contains(room.memory.attackTargets, attacker.id)) {
+		room.memory.attackTargets.push(attacker.id as Id<Exclude<typeof attacker, StructureTower>>);
 	}
 });
 
-global.EventBus.subscribe(EVENT_ROOM_RCL_CHANGE, ({ room: roomName, old, new: newLevel }) => {
-	const room = Game.rooms[roomName];
-
+global.EventBus.subscribe(EVENT_ROOM_RCL_CHANGE, ({ room, oldLevel, newLevel }) => {
 	if (!room.controller?.my) { return; }
 
-	if (newLevel > old) {
+	if (newLevel > oldLevel) {
 		roomHandlerConstruction(room);
 	}
 });

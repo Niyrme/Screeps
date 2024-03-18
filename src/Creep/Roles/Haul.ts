@@ -53,18 +53,20 @@ export class RoleHaul extends BaseRole {
 		if (creep.memory.gather) {
 			const { dropped, tombstones, ruins, strucutres } = creep.room.getResources();
 			const resources = [
-				...dropped.map(d => Game.getObjectById(d.id)),
-				...tombstones.map(t => Game.getObjectById(t.id)),
-				...ruins.map(r => Game.getObjectById(r.id)),
-				...strucutres.map(s => Game.getObjectById(s.id)),
+				...dropped,
+				...tombstones,
+				...ruins,
+				...strucutres,
 			]
-				.filter((v): v is Exclude<typeof v, null> => !!v)
 				.filter((r): r is Exclude<typeof r, StructureLink | StructureStorage> => {
 					if ("structureType" in r) {
-						return !(
-							r.structureType === STRUCTURE_LINK
-							|| r.structureType === STRUCTURE_STORAGE
-						);
+						switch (r.structureType) {
+							case STRUCTURE_LINK:
+							case STRUCTURE_STORAGE:
+								return false;
+							default:
+								return true;
+						}
 					} else {
 						return true;
 					}

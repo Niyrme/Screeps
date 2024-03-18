@@ -35,7 +35,7 @@ export class RoleHarvest extends BaseRole {
 		);
 
 		return spawn.newCreep(
-			_.flatten(_.fill(new Array(size), baseBody)),
+			_.flatten(_.fill(new Array<BodyPartConstant>(size), baseBody)),
 			{
 				memory: {
 					home: spawn.room.name,
@@ -100,9 +100,7 @@ export class RoleHarvest extends BaseRole {
 			const notTowers = structures.filter((s): s is Exclude<typeof s, StructureTower> => s.structureType !== STRUCTURE_TOWER);
 
 			let dest: null | (typeof structures)[0] | StructureStorage | StructureContainer = creep.pos.findClosestByPath(
-				notTowers.length !== 0
-					? notTowers
-					: structures,
+				notTowers.length !== 0 ? notTowers : structures,
 				{ ignoreCreeps: true },
 			);
 

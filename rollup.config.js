@@ -20,23 +20,15 @@ const modules = fs.readdirSync("src", { recursive: false })
 
 /** @type {import("rollup").RollupOptions} */
 const options = {
-	input: [
-		...modules.map(name => `src/${name}/_index.ts`),
-		"src/index.ts",
-	],
+	input: {
+		...Object.fromEntries(modules.map(name => [name, `src/${name}/_index.ts`])),
+		main: "src/index.ts"
+	},
 	output: {
 		dir: "dist",
 		format: "commonjs",
 		globals: {
 			"_": "lodash",
-		},
-		entryFileNames(chunk) {
-			const chunkPath = path.parse(chunk.facadeModuleId);
-			if (chunkPath.name === "_index") {
-				return `${path.parse(chunkPath.dir).name}.js`;
-			} else {
-				return "main.js";
-			}
 		},
 	},
 	external: modules,

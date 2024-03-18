@@ -19,17 +19,12 @@ export abstract class BaseRole {
 
 		const resources = creep.room.getResources(resource);
 		const tempResources = [
-			...resources.dropped.map(d => Game.getObjectById(d.id)),
-			...resources.tombstones.map(t => Game.getObjectById(t.id)),
-			...resources.ruins.map(r => Game.getObjectById(r.id)),
+			...resources.dropped,
+			...resources.tombstones,
+			...resources.ruins,
 		];
 
-		let sources = (
-			tempResources.length !== 0
-				? tempResources
-				: resources.strucutres.map(s => Game.getObjectById(s.id))
-		)
-			.filter((v): v is Exclude<typeof v, null> => !!v)
+		let sources = (tempResources.length !== 0 ? tempResources : resources.strucutres)
 			.filter((r): r is Exclude<typeof r, StructureLink> => {
 				if ("structureType" in r) {
 					return r.structureType !== STRUCTURE_LINK;
@@ -64,14 +59,11 @@ export abstract class BaseRole {
 			return ERR_NOT_FOUND;
 		}
 
-		if ((src as Resource<RESOURCE_ENERGY>).amount) {
-			const resource = src as Resource<RESOURCE_ENERGY>;
-			creep.travelTo(resource);
-			return creep.pickup(resource);
+		creep.travelTo(src);
+		if ("amount" in src) {
+			return creep.pickup(src);
 		} else {
-			const structure = src as Exclude<typeof src, Resource>;
-			creep.travelTo(structure);
-			return creep.withdraw(structure, resource);
+			return creep.withdraw(src, resource);
 		}
 	}
 }

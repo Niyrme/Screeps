@@ -1,18 +1,25 @@
-import "Prototype";
-import "EventBus";
+import "Global";
 import "Lib";
 
-import "Global";
 import "Creep";
 import "Room";
 import "RoomPosition";
 import "StructureSpawn";
-import { creepManager, EVENT_CREEP_DIED } from "Creep";
+import { creepManager } from "Creep";
+import { EVENT_CREEP_DIED, EVENT_CREEP_SPAWNED } from "Events";
 import { roomManager } from "Room";
+import { Logging } from "Utils";
 
-(function init() {
+void function init() {
+	Logging.info("initializing");
 	_.forEach(Game.rooms, roomManager.placeConstructionSites);
-})();
+	Logging.info("done");
+}();
+
+void function setupLogging() {
+	global.EventBus.subscribe(EVENT_CREEP_SPAWNED, ({ name }) => Logging.info(`new creep: ${name}`));
+	global.EventBus.subscribe(EVENT_CREEP_DIED, ({ name }) => Logging.info(`creep died: ${name}`));
+};
 
 export function loop(): void {
 	for (const name in Memory.creeps) {
@@ -20,7 +27,7 @@ export function loop(): void {
 			global.EventBus.trigger(EVENT_CREEP_DIED, {
 				name,
 				memory: Memory.creeps[name],
-			} as IEventBus.Creep.Died.EventBody);
+			});
 			delete Memory.creeps[name];
 		} else {
 			creepManager(Game.creeps[name]);

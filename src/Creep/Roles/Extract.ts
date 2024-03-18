@@ -21,11 +21,11 @@ export class RoleExtract extends BaseRole {
 	public static readonly NAME: "extract" = "extract";
 
 	public static spawn(spawn: StructureSpawn, mineral: RoleExtract.Memory["mineral"]): StructureSpawn.SpawnCreepReturnType {
-		const body = ([] as Array<BodyPartConstant>).concat(
-			_.flatten(_.fill(new Array(2), MOVE)),
-			_.flatten(_.fill(new Array(5), WORK)),
-			_.flatten(_.fill(new Array(3), MOVE)),
-		);
+		const body: Array<BodyPartConstant> = [
+			..._.flatten(_.fill(new Array(2), MOVE)),
+			..._.flatten(_.fill(new Array(5), WORK)),
+			..._.flatten(_.fill(new Array(3), MOVE)),
+		];
 
 		while (Creep.getBodyCost(body) > spawn.room.energyCapacityAvailable) {
 			body.pop();
@@ -57,7 +57,7 @@ export class RoleExtract extends BaseRole {
 		if (!creep.memory.atMineral) {
 			const { structures } = creep.room.getTickCache();
 			const [container] = mineral.pos.findInRange(structures, 1, {
-				filter: (s: AnyStructure): s is Extract<typeof s, StructureContainer> => s.structureType === STRUCTURE_CONTAINER,
+				filter: (s): s is Extract<typeof s, StructureContainer> => s.structureType === STRUCTURE_CONTAINER,
 			});
 
 			if (container) {
