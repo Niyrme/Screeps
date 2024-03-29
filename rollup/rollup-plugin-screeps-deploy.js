@@ -1,3 +1,5 @@
+import { ScreepsAPI } from "screeps-api";
+
 /**
  * @returns {import("rollup").Plugin}
  */
@@ -17,22 +19,10 @@ export const screepsDeploy = ({ dest, config }) => ({
 			code,
 		]));
 
-		const url = new URL("/api/user/code", config.host);
-		if (config.port) {
-			url.port = config.port;
-		}
+		const { branch, ...apiConfig } = config;
 
-		await fetch(url, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				"X-Token": config.token,
-			},
-			body: JSON.stringify({
-				branch: config.branch,
-				modules,
-			}),
-		});
+		const api = new ScreepsAPI(apiConfig);
+		await api.code.set(branch, modules, null);
 	},
 });
 
