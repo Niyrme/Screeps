@@ -14,13 +14,14 @@
 	"devDependencies": {
 		"@rollup/plugin-node-resolve": "^15.2.3",
 		"@rollup/plugin-swc": "^0.3.0",
+		"@rollup/plugin-terser": "^0.4.4",
 		"@types/lodash": "^3.10.1",
-		"@types/screeps": "^3.3.7",
-		"lodash": "3.10.1",
-		"rollup": "^4.9.6",
-		"rollup-plugin-clear": "^2.0.7"
+		"@types/node": "^20.11.30",
+		"@types/screeps": "^3.3.7"
 	},
 	"dependencies": {
+		"rollup": "^4.9.6",
+		"rollup-plugin-clear": "^2.0.7",
 		"screeps-api": "^1.16.0"
 	}
 }

@@ -2,6 +2,7 @@
 
 import nodeResolve from "@rollup/plugin-node-resolve";
 import swc from "@rollup/plugin-swc";
+import terser from "@rollup/plugin-terser";
 import fs from "node:fs";
 import path from "node:path";
 import clear from "rollup-plugin-clear";
@@ -14,6 +15,11 @@ if (dest && (!(cfg = require("./screeps.json")[dest]))) {
 	throw new Error("A");
 }
 
+const rootModules = [
+	"SourceMapper",
+];
+
+/** @type {Array<string>} */
 const modules = fs.readdirSync("src", { recursive: false })
 	.filter(name => name !== "WASM" && fs.statSync(path.join("src", name)).isDirectory());
 
@@ -21,6 +27,7 @@ const modules = fs.readdirSync("src", { recursive: false })
 const options = {
 	input: {
 		...Object.fromEntries(modules.map(name => [name, `src/${name}/_index.ts`])),
+		...Object.fromEntries(rootModules.map(name => [name, `src/${name}.ts`])),
 		main: "src/index.ts",
 	},
 	output: {
@@ -29,8 +36,10 @@ const options = {
 		globals: {
 			"_": "lodash",
 		},
+		sourcemap: "hidden",
+		sourcemapFileNames: "[name].map.json"
 	},
-	external: modules,
+	external: [...rootModules, ...modules],
 	plugins: [
 		clear({
 			targets: ["dist"],
@@ -47,6 +56,9 @@ const options = {
 					target: "es2018",
 				},
 			},
+		}),
+		terser({
+			ecma: 2018,
 		}),
 		screeps(),
 		screepsDeploy({ dest, config: cfg }),
