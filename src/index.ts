@@ -1,5 +1,7 @@
 import "Global";
 import "Lib";
+import "Prototypes";
+import { handleCreep, handleRoom } from "Handlers";
 import { profiler } from "Lib";
 
 import { SourceMapper } from "SourceMapper";
@@ -12,4 +14,7 @@ export const loop = SourceMapper(() => {
 			delete Memory.creeps[name];
 		}
 	}
+
+	_.forEach(Game.rooms, handleRoom);
+	_.forEach(Game.creeps, handleCreep);
 });

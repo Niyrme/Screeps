@@ -13,8 +13,11 @@
 		"resolveJsonModule": true,
 		"paths": {
 			"Global": ["src/Global/_index.ts"],
+			"Handlers": ["src/Handlers/_index.ts"],
 			"Lib": ["src/Lib/_index.ts"],
+			"Prototypes": ["src/Prototypes/_index.ts"],
 			"SourceMapper": ["src/SourceMapper.ts"],
+			"Utils": ["src/Utils/_index.ts"]
 		}
 	},
 	"include": [

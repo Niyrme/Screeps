@@ -6,4 +6,10 @@ declare global {
 	const global: Global;
 }
 
+declare global {
+	interface Memory {
+		debug: boolean
+	}
+}
+
 export {};
