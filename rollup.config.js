@@ -37,7 +37,7 @@ const options = {
 			"_": "lodash",
 		},
 		sourcemap: "hidden",
-		sourcemapFileNames: "[name].map.json"
+		sourcemapFileNames: "[name].map.json",
 	},
 	external: [...rootModules, ...modules],
 	plugins: [
