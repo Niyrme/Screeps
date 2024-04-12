@@ -11,16 +11,18 @@
 		"noEmit": true,
 		"esModuleInterop": true,
 		"resolveJsonModule": true,
+		"baseUrl": "./src",
 		"paths": {
-			"Global": ["src/Global/_index.ts"],
-			"Handlers": ["src/Handlers/_index.ts"],
-			"Lib": ["src/Lib/_index.ts"],
-			"Prototypes": ["src/Prototypes/_index.ts"],
-			"SourceMapper": ["src/SourceMapper.ts"],
-			"Utils": ["src/Utils/_index.ts"]
+			"Global": ["Global/_index.ts"],
+			"Handlers": ["Handlers/_index.ts"],
+			"Lib": ["Lib/_index.ts"],
+			"Prototypes": ["Prototypes/_index.ts"],
+			"SourceMapper": ["SourceMapper.ts"],
+			"Utils": ["Utils/_index.ts"]
 		}
 	},
 	"include": [
-		"src/**/*"
+		"src/**/*",
+		"node_modules/@types/*"
 	]
 }
