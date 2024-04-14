@@ -1,14 +1,14 @@
+import type { LoDashStatic } from "lodash";
+
 declare global {
-	interface Global extends Record<string, any> {}
+	const _: LoDashStatic;
 
 	type PartialRequired<T, Keys extends keyof T> = Omit<T, Keys> & Required<Pick<T, Keys>>
-
-	const global: Global;
 }
 
 declare global {
 	interface Memory {
-		debug: boolean
+		debug: boolean;
 	}
 }
 
