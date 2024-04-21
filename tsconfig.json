@@ -11,15 +11,7 @@
 		"noEmit": true,
 		"esModuleInterop": true,
 		"resolveJsonModule": true,
-		"baseUrl": "./src",
-		"paths": {
-			"Global": ["Global/_index.ts"],
-			"Handlers": ["Handlers/_index.ts"],
-			"Lib": ["Lib/_index.ts"],
-			"Prototypes": ["Prototypes/_index.ts"],
-			"SourceMapper": ["SourceMapper.ts"],
-			"Utils": ["Utils/_index.ts"]
-		}
+		"moduleResolution": "NodeNext"
 	},
 	"include": [
 		"src/**/*",

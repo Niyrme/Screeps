@@ -1,27 +1,29 @@
 {
-	"name": "screeps-typescript",
-	"version": "1.0.0",
-	"description": "typescript template for screeps",
-	"scripts": {
-		"build": "rollup --bundleConfigAsCjs -c",
-		"watch": "rollup --bundleConfigAsCjs -cw",
-		"push-main": "rollup --bundleConfigAsCjs -c --environment DEST:main",
-		"push-local": "rollup --bundleConfigAsCjs -c --environment DEST:localhost"
-	},
-	"author": "niyrme",
-	"repository": "github:niyrme/screeps-typescript",
-	"license": "MIT",
-	"devDependencies": {
-		"@types/lodash": "^3.10.1",
-		"@types/node": "^20.11.30",
-		"@types/screeps": "^3.3.7"
-	},
-	"dependencies": {
-		"@rollup/plugin-node-resolve": "^15.2.3",
-		"@rollup/plugin-swc": "^0.3.0",
-		"@rollup/plugin-terser": "^0.4.4",
-		"rollup": "^4.9.6",
-		"rollup-plugin-clear": "^2.0.7",
-		"screeps-api": "^1.16.0"
-	}
+  "name": "screeps-typescript",
+  "version": "1.0.0",
+  "description": "typescript template for screeps",
+  "scripts": {
+    "build": "rollup --bundleConfigAsCjs -c",
+    "watch": "rollup --bundleConfigAsCjs -cw",
+    "push-main": "rollup --bundleConfigAsCjs -c --environment DEST:main",
+    "push-local": "rollup --bundleConfigAsCjs -c --environment DEST:localhost"
+  },
+  "author": "niyrme",
+  "repository": "github:niyrme/screeps-typescript",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/bun": "^1.0.12",
+    "@types/lodash": "^3.10.1",
+    "@types/node": "^20.11.30",
+    "@types/screeps": "^3.3.7"
+  },
+  "dependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-swc": "^0.3.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.9.6",
+    "rollup-plugin-clear": "^2.0.7",
+    "screeps-api": "^1.16.0"
+  }
 }

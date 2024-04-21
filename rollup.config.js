@@ -1,10 +1,9 @@
 "use strict";
 
+import commonjs from "@rollup/plugin-commonjs";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import swc from "@rollup/plugin-swc";
 import terser from "@rollup/plugin-terser";
-import fs from "node:fs";
-import path from "node:path";
 import clear from "rollup-plugin-clear";
 import screepsDeploy from "./rollup/rollup-plugin-screeps-deploy.js";
 import screeps from "./rollup/rollup-plugin-screeps.js";
@@ -15,21 +14,9 @@ if (dest && (!(cfg = require("./screeps.json")[dest]))) {
 	throw new Error("A");
 }
 
-const rootModules = [
-	"SourceMapper",
-];
-
-/** @type {Array<string>} */
-const modules = fs.readdirSync("src", { recursive: false })
-	.filter(name => name !== "WASM" && fs.statSync(path.join("src", name)).isDirectory());
-
 /** @type {import("rollup").RollupOptions} */
 const options = {
-	input: {
-		...Object.fromEntries(modules.map(name => [name, `src/${name}/_index.ts`])),
-		...Object.fromEntries(rootModules.map(name => [name, `src/${name}.ts`])),
-		main: "src/index.ts",
-	},
+	input: { main: "src/index.ts" },
 	output: {
 		dir: "dist",
 		format: "commonjs",
@@ -37,13 +24,14 @@ const options = {
 			"_": "lodash",
 		},
 		sourcemap: "hidden",
-		sourcemapFileNames: "[name].map.json",
+		sourcemapFileNames: "[name].js.map",
+		inlineDynamicImports: true,
 	},
-	external: [...rootModules, ...modules],
 	plugins: [
 		clear({
 			targets: ["dist"],
 		}),
+		commonjs(),
 		nodeResolve(),
 		swc({
 			swc: {
@@ -57,9 +45,7 @@ const options = {
 				},
 			},
 		}),
-		terser({
-			ecma: 2018,
-		}),
+		terser({ ecma: 2018 }),
 		screeps(),
 		screepsDeploy({ dest, config: cfg }),
 	],
