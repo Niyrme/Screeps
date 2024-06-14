@@ -13,11 +13,19 @@ export const screepsDeploy = ({ dest, config }) => ({
 
 		console.info(`[INFO] pushing code to config ${dest}. Branch: ${config.branch}`);
 
-		/** @type {Record<string, string>} */
-		const modules = Object.fromEntries(Object.values(bundle).map(({ fileName, code }) => [
-			/^(.*?)(?:\.js)?$/.exec(fileName)[1],
-			code,
-		]));
+		// /** @type {Record<string, string>} */
+		// const modules = Object.fromEntries(Object.values(bundle).map(({ fileName, code }) => [
+		// 	/^(.*?)(?:\.js)?$/.exec(fileName)[1],
+		// 	code,
+		// ]));
+		const [main, mainMap] = await Promise.all([
+			Bun.file("dist/main.js").text(),
+			Bun.file("dist/main.js.map").text(),
+		]);
+		const modules = {
+			"main": main,
+			"main.js.map": mainMap,
+		};
 
 		const { branch, ...apiConfig } = config;
 
