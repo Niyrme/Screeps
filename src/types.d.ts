@@ -1,14 +1,12 @@
+import type { LoDashStatic } from "lodash";
+
 declare global {
-	// global memory
+	const _: LoDashStatic;
+}
+
+declare global {
 	interface Memory {
-	}
-
-	// creep memory
-	interface CreepMemory {
-	}
-
-	// creep prototypes
-	interface Creep {
+		debug: boolean;
 	}
 }
 
