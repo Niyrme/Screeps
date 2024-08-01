@@ -1,6 +1,6 @@
 {
 	"name": "screeps-typescript",
-	"version": "1.0.0",
+	"version": "2.0.0",
 	"description": "typescript template for screeps",
 	"scripts": {
 		"build": "bun run scripts/build.ts",
