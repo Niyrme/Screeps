@@ -1,7 +1,7 @@
 // include all utils
-import "./util/_all.ts";
+import "./util";
 // include all prototypes
-import "./prototypes/_all.ts";
+import "./prototypes";
 
 export function loop(): void {
 	for (const name in Memory.creeps) {
