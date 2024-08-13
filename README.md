@@ -13,8 +13,9 @@ This is a typescript template for [screeps](https://screeps.com) and [bun](https
 1. Clone this repository
 
 2. Install the requirements
+
 ```shell
-$ bun install
+bun install
 ```
 
 ---
@@ -22,9 +23,11 @@ $ bun install
 # Building
 
 To build the project run the `build` script
+
 ```shell
-$ bun run build
+bun run build
 ```
+
 A `watch` script is available as well
 
 The compiled output will be available in [`dist/main.js`](./dist/main.js)
@@ -47,11 +50,6 @@ You can see an exmaple in [`src/prototypes/Creep.ts`](./src/prototypes/Creep.ts)
 
 There are utilities available in [`src/util`](./src/util) if you need any.
 You can import them directly or from the [`src/util/index.ts`](./src/util/index.ts) as they are re-exported there as well.
-
----
-
-# Planned
-- Error Sourcemaps
 
 ---
 
