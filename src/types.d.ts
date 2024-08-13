@@ -7,6 +7,7 @@ declare global {
 declare global {
 	interface Memory {
 		debug: boolean;
+		profiler?: boolean;
 	}
 }
 

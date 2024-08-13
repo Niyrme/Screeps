@@ -1,11 +1,5 @@
 // @ts-nocheck
-/**
- * To start using Traveler, require it in main.js:
- * Example: var Traveler = require('Traveler.js');
- */
-
 export class Traveler {
-
 	private static structureMatrixCache: { [roomName: string]: CostMatrix } = {};
 	private static creepMatrixCache: { [roomName: string]: CostMatrix } = {};
 	private static creepMatrixTick: number;
@@ -13,16 +7,10 @@ export class Traveler {
 
 	/**
 	 * move creep to destination
-	 * @param creep
-	 * @param destination
-	 * @param options
-	 * @returns {number}
 	 */
-
 	public static travelTo(creep: Creep, destination: HasPos | RoomPosition, options: TravelToOptions = {}): number {
-
 		// uncomment if you would like to register hostile rooms entered
-		// this.updateRoomStatus(creep.room);
+		this.updateRoomStatus(creep.room);
 
 		if (!destination) {
 			return ERR_INVALID_ARGS;
@@ -137,7 +125,7 @@ export class Traveler {
 
 		// consume path
 		if (state.stuckCount === 0 && !newPath) {
-			travelData.path = travelData.path.substr(1);
+			travelData.path = travelData.path.substring(1);
 		}
 
 		let nextDirection = parseInt(travelData.path[0], 10);
@@ -154,10 +142,7 @@ export class Traveler {
 
 	/**
 	 * make position objects consistent so that either can be used as an argument
-	 * @param destination
-	 * @returns {any}
 	 */
-
 	public static normalizePos(destination: HasPos | RoomPosition): RoomPosition {
 		if (!(destination instanceof RoomPosition)) {
 			return destination.pos;
@@ -167,53 +152,35 @@ export class Traveler {
 
 	/**
 	 * check if room should be avoided by findRoute algorithm
-	 * @param roomName
-	 * @returns {RoomMemory|number}
 	 */
-
 	public static checkAvoid(roomName: string) {
 		return Memory.rooms && Memory.rooms[roomName] && Memory.rooms[roomName].avoid;
 	}
 
 	/**
 	 * check if a position is an exit
-	 * @param pos
-	 * @returns {boolean}
 	 */
-
 	public static isExit(pos: Coord): boolean {
 		return pos.x === 0 || pos.y === 0 || pos.x === 49 || pos.y === 49;
 	}
 
 	/**
 	 * check two coordinates match
-	 * @param pos1
-	 * @param pos2
-	 * @returns {boolean}
 	 */
-
 	public static sameCoord(pos1: Coord, pos2: Coord): boolean {
 		return pos1.x === pos2.x && pos1.y === pos2.y;
 	}
 
 	/**
 	 * check if two positions match
-	 * @param pos1
-	 * @param pos2
-	 * @returns {boolean}
 	 */
-
 	public static samePos(pos1: RoomPosition, pos2: RoomPosition) {
 		return this.sameCoord(pos1, pos2) && pos1.roomName === pos2.roomName;
 	}
 
 	/**
 	 * draw a circle at position
-	 * @param pos
-	 * @param color
-	 * @param opacity
 	 */
-
 	public static circle(pos: RoomPosition, color: string, opacity?: number) {
 		new RoomVisual(pos.roomName).circle(pos, {
 			radius: .45, fill: "transparent", stroke: color, strokeWidth: .15, opacity: opacity,
@@ -222,9 +189,7 @@ export class Traveler {
 
 	/**
 	 * update memory on whether a room should be avoided based on controller owner
-	 * @param room
 	 */
-
 	public static updateRoomStatus(room: Room) {
 		if (!room) { return; }
 		if (room.controller) {
@@ -238,16 +203,10 @@ export class Traveler {
 
 	/**
 	 * find a path from origin to destination
-	 * @param origin
-	 * @param destination
-	 * @param options
-	 * @returns {PathfinderReturn}
 	 */
-
 	public static findTravelPath(origin: RoomPosition | HasPos, destination: RoomPosition | HasPos,
 		options: TravelToOptions = {},
 	): PathfinderReturn {
-
 		_.defaults(options, {
 			ignoreCreeps: true,
 			maxOps: DEFAULT_MAXOPS,
@@ -355,16 +314,10 @@ export class Traveler {
 
 	/**
 	 * find a viable sequence of rooms that can be used to narrow down pathfinder's search algorithm
-	 * @param origin
-	 * @param destination
-	 * @param options
-	 * @returns {{}}
 	 */
-
 	public static findRoute(origin: string, destination: string,
 		options: TravelToOptions = {},
 	): { [roomName: string]: boolean } | void {
-
 		let restrictDistance = options.restrictDistance || Game.map.getRoomLinearDistance(origin, destination) + 10;
 		let allowedRooms = { [origin]: true, [destination]: true };
 
@@ -378,7 +331,6 @@ export class Traveler {
 
 		let ret = Game.map.findRoute(origin, destination, {
 			routeCallback: (roomName: string) => {
-
 				if (options.routeCallback) {
 					let outcome = options.routeCallback(roomName);
 					if (outcome !== undefined) {
@@ -436,11 +388,7 @@ export class Traveler {
 
 	/**
 	 * check how many rooms were included in a route returned by findRoute
-	 * @param origin
-	 * @param destination
-	 * @returns {number}
 	 */
-
 	public static routeDistance(origin: string, destination: string): number | void {
 		let linearDistance = Game.map.getRoomLinearDistance(origin, destination);
 		if (linearDistance >= 32) {
@@ -455,11 +403,7 @@ export class Traveler {
 
 	/**
 	 * build a cost matrix based on structures in the room. Will be cached for more than one tick. Requires vision.
-	 * @param room
-	 * @param freshMatrix
-	 * @returns {any}
 	 */
-
 	public static getStructureMatrix(room: Room, freshMatrix?: boolean): CostMatrix {
 		if (!this.structureMatrixCache[room.name] || (freshMatrix && Game.time !== this.structureMatrixTick)) {
 			this.structureMatrixTick = Game.time;
@@ -471,10 +415,7 @@ export class Traveler {
 
 	/**
 	 * build a cost matrix based on creeps and structures in the room. Will be cached for one tick. Requires vision.
-	 * @param room
-	 * @returns {any}
 	 */
-
 	public static getCreepMatrix(room: Room) {
 		if (!this.creepMatrixCache[room.name] || Game.time !== this.creepMatrixTick) {
 			this.creepMatrixTick = Game.time;
@@ -488,14 +429,8 @@ export class Traveler {
 
 	/**
 	 * add structures to matrix so that impassible structures can be avoided and roads given a lower cost
-	 * @param room
-	 * @param matrix
-	 * @param roadCost
-	 * @returns {CostMatrix}
 	 */
-
 	public static addStructuresToMatrix(room: Room, matrix: CostMatrix, roadCost: number): CostMatrix {
-
 		let impassibleStructures: Structure[] = [];
 		for (let structure of room.find<Structure>(FIND_STRUCTURES)) {
 			if (structure instanceof StructureRampart) {
@@ -526,11 +461,7 @@ export class Traveler {
 
 	/**
 	 * add creeps to matrix so that they will be avoided by other creeps
-	 * @param room
-	 * @param matrix
-	 * @returns {CostMatrix}
 	 */
-
 	public static addCreepsToMatrix(room: Room, matrix: CostMatrix): CostMatrix {
 		room.find<Creep>(FIND_CREEPS).forEach((creep: Creep) => matrix.set(creep.pos.x, creep.pos.y, 0xff));
 		return matrix;
@@ -538,12 +469,7 @@ export class Traveler {
 
 	/**
 	 * serialize a path, traveler style. Returns a string of directions.
-	 * @param startPos
-	 * @param path
-	 * @param color
-	 * @returns {string}
 	 */
-
 	public static serializePath(startPos: RoomPosition, path: RoomPosition[], color = "orange"): string {
 		let serializedPath = "";
 		let lastPosition = startPos;
@@ -561,11 +487,7 @@ export class Traveler {
 
 	/**
 	 * returns a position at a direction relative to origin
-	 * @param origin
-	 * @param direction
-	 * @returns {RoomPosition}
 	 */
-
 	public static positionAtDirection(origin: RoomPosition, direction: number): RoomPosition | void {
 		let offsetX = [0, 0, 1, 1, 1, 0, -1, -1, -1];
 		let offsetY = [0, -1, -1, 0, 1, 1, 1, 0, -1];
@@ -577,9 +499,7 @@ export class Traveler {
 
 	/**
 	 * convert room avoidance memory from the old pattern to the one currently used
-	 * @param cleanup
 	 */
-
 	public static patchMemory(cleanup = false) {
 		if (!Memory.empire) { return; }
 		if (!Memory.empire.hostileRooms) { return; }
@@ -655,6 +575,68 @@ const STATE_DEST_Y = 5;
 const STATE_DEST_ROOMNAME = 6;
 
 // assigns a function to Creep.prototype: creep.travelTo(destination)
-Creep.prototype.travelTo = function (destination: RoomPosition | { pos: RoomPosition }, options?: TravelToOptions) {
+Creep.prototype.travelTo = function (destination, options?) {
 	return Traveler.travelTo(this, destination, options);
 };
+
+// types
+
+interface PathfinderReturn {
+	path: RoomPosition[];
+	ops: number;
+	cost: number;
+	incomplete: boolean;
+}
+
+interface TravelToReturnData {
+	nextPos?: RoomPosition;
+	pathfinderReturn?: PathfinderReturn;
+	state?: TravelState;
+	path?: string;
+}
+
+interface TravelToOptions {
+	ignoreRoads?: boolean;
+	ignoreCreeps?: boolean;
+	ignoreStructures?: boolean;
+	preferHighway?: boolean;
+	highwayBias?: number;
+	allowHostile?: boolean;
+	allowSK?: boolean;
+	range?: number;
+	obstacles?: { pos: RoomPosition }[];
+	roomCallback?: (roomName: string, matrix: CostMatrix) => CostMatrix | boolean;
+	routeCallback?: (roomName: string) => number;
+	returnData?: TravelToReturnData;
+	restrictDistance?: number;
+	useFindRoute?: boolean;
+	maxOps?: number;
+	movingTarget?: boolean;
+	freshMatrix?: boolean;
+	offRoad?: boolean;
+	stuckValue?: number;
+	maxRooms?: number;
+	repath?: number;
+	route?: { [roomName: string]: boolean };
+	ensurePath?: boolean;
+}
+
+interface TravelData {
+	state: any[];
+	path: string;
+}
+
+interface TravelState {
+	stuckCount: number;
+	lastCoord: Coord;
+	destination: RoomPosition;
+	cpu: number;
+}
+
+declare global {
+	interface Creep {
+		travelTo(destination: RoomPosition | _HasRoomPosition, ops?: TravelToOptions): number;
+	}
+}
+
+type Coord = { x: number, y: number };
