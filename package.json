@@ -1,24 +1,21 @@
 {
 	"name": "screeps-typescript",
-	"version": "2.1.0",
-	"description": "typescript template for screeps",
-	"scripts": {
-		"build": "bun run scripts/build.ts",
-		"watch": "bun run scripts/watch.ts"
-	},
+	"version": "9.0.0",
 	"author": "niyrme",
 	"repository": "github:niyrme/screeps-typescript",
 	"license": "MIT",
 	"dependencies": {
 		"lodash": "3.10.1",
-		"screeps-api": "^1.16.1"
+		"screeps-api": "^1.16.1",
+		"screeps-profiler": "^2.0.1"
 	},
 	"devDependencies": {
-		"@types/bun": "^1.1.6",
+		"@types/bun": "^1.2.2",
 		"@types/lodash": "^4.17.7",
-		"@types/node": "^22.0.2",
+		"@types/node": "^22.13.1",
 		"@types/screeps": "^3.3.8",
-		"esbuild": "0.23.0",
-		"source-map-js": "^1.2.0"
+		"@types/screeps-profiler": "^1.2.6",
+		"esbuild": "0.25.0",
+		"source-map-js": "^1.2.1"
 	}
 }
